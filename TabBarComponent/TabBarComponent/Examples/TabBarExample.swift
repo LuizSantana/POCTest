@@ -1,0 +1,153 @@
+import SwiftUI
+
+// MARK: - TabBar Example Usage
+struct TabBarExample: View {
+    @StateObject private var dataProvider = DefaultTabBarDataProvider()
+    @State private var showTabBar = true
+    
+    var body: some View {
+        NavigationView {
+            VStack {
+                // Content area
+                TabBar(
+                    style: DefaultTabBarStyle()
+                        .background(Color(.systemBackground))
+                        .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: -4),
+                    dataProvider: dataProvider,
+                    items: TabBarItemFactory.createDefaultItems(),
+                    onItemSelected: { item in
+                        print("Selected: \(item.title ?? item.id)")
+                    }
+                ) { item in
+                    TabContentView(item: item)
+                }
+                
+                // Control buttons
+                VStack(spacing: 16) {
+                    HStack(spacing: 16) {
+                        Button("Show TabBar") {
+                            dataProvider.setState(.visible)
+                        }
+                        .buttonStyle(.bordered)
+                        
+                        Button("Hide TabBar") {
+                            dataProvider.setState(.hidden)
+                        }
+                        .buttonStyle(.bordered)
+                    }
+                    
+                    HStack(spacing: 16) {
+                        Button("Default Style") {
+                            // Switch to default style
+                        }
+                        .buttonStyle(.bordered)
+                        
+                        Button("Compact Style") {
+                            // Switch to compact style
+                        }
+                        .buttonStyle(.bordered)
+                        
+                        Button("Floating Style") {
+                            // Switch to floating style
+                        }
+                        .buttonStyle(.bordered)
+                    }
+                }
+                .padding()
+            }
+            .navigationTitle("TabBar Example")
+        }
+    }
+}
+
+
+// MARK: - Multiple Style Examples
+struct TabBarStyleExamples: View {
+    @StateObject private var dataProvider = DefaultTabBarDataProvider()
+    
+    var body: some View {
+        TabView {
+            // Default Style
+            TabBar(
+                style: DefaultTabBarStyle(),
+                dataProvider: dataProvider,
+                items: TabBarItemFactory.createDefaultItems()
+            ) { item in
+                TabContentView(item: item)
+            }
+            .tabItem {
+                Label("Default", systemImage: "rectangle.3.group")
+            }
+            
+            // Compact Style
+            TabBar(
+                style: CompactTabBarStyle(),
+                dataProvider: dataProvider,
+                items: TabBarItemFactory.createDefaultItems()
+            ) { item in
+                TabContentView(item: item)
+            }
+            .tabItem {
+                Label("Compact", systemImage: "rectangle.compress.vertical")
+            }
+            
+            // Floating Style
+            TabBar(
+                style: FloatingTabBarStyle(),
+                dataProvider: dataProvider,
+                items: TabBarItemFactory.createDefaultItems()
+            ) { item in
+                TabContentView(item: item)
+            }
+            .tabItem {
+                Label("Floating", systemImage: "circle.hexagongrid")
+            }
+            
+            // Minimal Style
+            TabBar(
+                style: MinimalTabBarStyle(),
+                dataProvider: dataProvider,
+                items: TabBarItemFactory.createDefaultItems()
+            ) { item in
+                TabContentView(item: item)
+            }
+            .tabItem {
+                Label("Minimal", systemImage: "minus.circle")
+            }
+        }
+    }
+}
+
+// MARK: - Composable Style Example
+struct ComposableStyleExample: View {
+    @StateObject private var dataProvider = DefaultTabBarDataProvider()
+    
+    var body: some View {
+        TabBar(
+            style: DefaultTabBarStyle()
+                .background(Color.blue.opacity(0.1), cornerRadius: 20)
+                .shadow(color: .blue.opacity(0.3), radius: 12, x: 0, y: 6)
+                .padding(horizontal: 20, vertical: 12),
+            dataProvider: dataProvider,
+            items: TabBarItemFactory.createDefaultItems()
+        ) { item in
+            TabContentView(item: item)
+        }
+    }
+}
+
+// MARK: - Preview
+struct TabBarExample_Previews: PreviewProvider {
+    static var previews: some View {
+        Group {
+            TabBarExample()
+                .previewDisplayName("Basic Example")
+            
+            TabBarStyleExamples()
+                .previewDisplayName("Style Examples")
+            
+            ComposableStyleExample()
+                .previewDisplayName("Composable Style")
+        }
+    }
+}
