@@ -2,8 +2,9 @@ import SwiftUI
 
 // MARK: - TabBar Example Usage
 struct TabBarExample: View {
-    @StateObject private var dataProvider = DefaultTabBarDataProvider()
+    @StateObject private var dataProvider = DefaultTabBarDataProvider(items: TabBarItemFactory.createDefaultItems())
     @State private var showTabBar = true
+    @StateObject private var tabBarDelegate = SampleTabBarDelegate()
     
     var body: some View {
         NavigationView {
@@ -14,10 +15,8 @@ struct TabBarExample: View {
                         .background(Color(.systemBackground))
                         .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: -4),
                     dataProvider: dataProvider,
-                    items: TabBarItemFactory.createDefaultItems(),
-                    onItemSelected: { item in
-                        print("Selected: \(item.title ?? item.id)")
-                    }
+                    delegate: tabBarDelegate,
+                    isAnimated: true
                 ) { item in
                     TabContentView(item: item)
                 }
@@ -63,7 +62,8 @@ struct TabBarExample: View {
 
 // MARK: - Multiple Style Examples
 struct TabBarStyleExamples: View {
-    @StateObject private var dataProvider = DefaultTabBarDataProvider()
+    @StateObject private var dataProvider = DefaultTabBarDataProvider(items: TabBarItemFactory.createDefaultItems())
+    @StateObject private var tabBarDelegate = SampleTabBarDelegate()
     
     var body: some View {
         TabView {
@@ -71,7 +71,8 @@ struct TabBarStyleExamples: View {
             TabBar(
                 style: DefaultTabBarStyle(),
                 dataProvider: dataProvider,
-                items: TabBarItemFactory.createDefaultItems()
+                delegate: tabBarDelegate,
+                isAnimated: true
             ) { item in
                 TabContentView(item: item)
             }
@@ -83,7 +84,8 @@ struct TabBarStyleExamples: View {
             TabBar(
                 style: CompactTabBarStyle(),
                 dataProvider: dataProvider,
-                items: TabBarItemFactory.createDefaultItems()
+                delegate: tabBarDelegate,
+                isAnimated: true
             ) { item in
                 TabContentView(item: item)
             }
@@ -95,7 +97,8 @@ struct TabBarStyleExamples: View {
             TabBar(
                 style: FloatingTabBarStyle(),
                 dataProvider: dataProvider,
-                items: TabBarItemFactory.createDefaultItems()
+                delegate: tabBarDelegate,
+                isAnimated: true
             ) { item in
                 TabContentView(item: item)
             }
@@ -107,7 +110,8 @@ struct TabBarStyleExamples: View {
             TabBar(
                 style: MinimalTabBarStyle(),
                 dataProvider: dataProvider,
-                items: TabBarItemFactory.createDefaultItems()
+                delegate: tabBarDelegate,
+                isAnimated: true
             ) { item in
                 TabContentView(item: item)
             }
@@ -120,7 +124,8 @@ struct TabBarStyleExamples: View {
 
 // MARK: - Composable Style Example
 struct ComposableStyleExample: View {
-    @StateObject private var dataProvider = DefaultTabBarDataProvider()
+    @StateObject private var dataProvider = DefaultTabBarDataProvider(items: TabBarItemFactory.createDefaultItems())
+    @StateObject private var tabBarDelegate = SampleTabBarDelegate()
     
     var body: some View {
         TabBar(
@@ -129,7 +134,8 @@ struct ComposableStyleExample: View {
                 .shadow(color: .blue.opacity(0.3), radius: 12, x: 0, y: 6)
                 .padding(horizontal: 20, vertical: 12),
             dataProvider: dataProvider,
-            items: TabBarItemFactory.createDefaultItems()
+            delegate: tabBarDelegate,
+            isAnimated: true
         ) { item in
             TabContentView(item: item)
         }

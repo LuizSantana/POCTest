@@ -4,22 +4,26 @@ import SwiftUI
 struct TabBar<Content: View>: View {
     @StateObject private var dataProvider: DefaultTabBarDataProvider
     private let style: any TabBarStyle
+    private let delegate: TabBarDelegate?
+    private let isAnimated: Bool
     
     private let content: (TabBarItem) -> Content
-    private let onItemSelected: (TabBarItem) -> Void
     
     init(
         style: any TabBarStyle,
-        dataProvider: DefaultTabBarDataProvider? = nil,
-        items: [TabBarItem] = [],
-        selectedItem: TabBarItem? = nil,
-        onItemSelected: @escaping (TabBarItem) -> Void = { _ in },
+        dataProvider: DefaultTabBarDataProvider,
+        delegate: TabBarDelegate? = nil,
+        isAnimated: Bool = true,
         @ViewBuilder content: @escaping (TabBarItem) -> Content
     ) {
         self.style = style
-        self._dataProvider = StateObject(wrappedValue: dataProvider ?? DefaultTabBarDataProvider(items: items, selectedItem: selectedItem))
-        self.onItemSelected = onItemSelected
+        self.delegate = delegate
+        self.isAnimated = isAnimated
         self.content = content
+        
+        // Set delegate on data provider before creating StateObject
+        dataProvider.delegate = delegate
+        self._dataProvider = StateObject(wrappedValue: dataProvider)
     }
     
     var body: some View {
@@ -38,13 +42,13 @@ struct TabBar<Content: View>: View {
             // Custom TabBar styling overlay
             AnyView(style.makeBody(configuration: configuration))
                 .opacity(dataProvider.state.isVisible ? 1 : 0)
-                .animation(.easeInOut(duration: 0.3), value: dataProvider.state)
+                .animation(isAnimated ? .easeInOut(duration: 0.3) : nil, value: dataProvider.state)
         }
         .modifier(OnChangeModifier(
             value: dataProvider.selectedItem,
             action: { newValue in
                 if let newValue = newValue {
-                    onItemSelected(newValue)
+                    delegate?.tabBar(TabBar<AnyView>(), didSelectItem: newValue)
                 }
             }
         ))
@@ -86,7 +90,8 @@ extension TabBar {
         TabBar<Content>(
             style: style,
             dataProvider: dataProvider,
-            onItemSelected: onItemSelected,
+            delegate: delegate,
+            isAnimated: isAnimated,
             content: content
         )
     }
@@ -108,11 +113,22 @@ extension TabBar {
         return self
     }
     
-    func onItemSelected(_ action: @escaping (TabBarItem) -> Void) -> TabBar<Content> {
+    func delegate(_ delegate: TabBarDelegate?) -> TabBar<Content> {
         TabBar<Content>(
             style: style,
             dataProvider: dataProvider,
-            onItemSelected: action,
+            delegate: delegate,
+            isAnimated: isAnimated,
+            content: content
+        )
+    }
+    
+    func animated(_ isAnimated: Bool) -> TabBar<Content> {
+        TabBar<Content>(
+            style: style,
+            dataProvider: dataProvider,
+            delegate: delegate,
+            isAnimated: isAnimated,
             content: content
         )
     }
@@ -133,14 +149,15 @@ extension TabBar {
     init(
         items: [TabBarItem] = [],
         selectedItem: TabBarItem? = nil,
-        onItemSelected: @escaping (TabBarItem) -> Void = { _ in },
+        delegate: TabBarDelegate? = nil,
+        isAnimated: Bool = true,
         @ViewBuilder content: @escaping (TabBarItem) -> Content
     ) {
         self.init(
             style: DefaultTabBarStyle(),
-            items: items,
-            selectedItem: selectedItem,
-            onItemSelected: onItemSelected,
+            dataProvider: DefaultTabBarDataProvider(items: items, selectedItem: selectedItem),
+            delegate: delegate,
+            isAnimated: isAnimated,
             content: content
         )
     }
@@ -152,7 +169,8 @@ struct TabBarModifier<TabContent: View>: ViewModifier {
     let items: [TabBarItem]
     let selectedItem: TabBarItem?
     let state: TabBarState
-    let onItemSelected: (TabBarItem) -> Void
+    let delegate: TabBarDelegate?
+    let isAnimated: Bool
     let tabContent: (TabBarItem) -> TabContent
     
     func body(content: Content) -> some View {
@@ -161,9 +179,9 @@ struct TabBarModifier<TabContent: View>: ViewModifier {
             
             TabBar(
                 style: DefaultTabBarStyle(),
-                items: items,
-                selectedItem: selectedItem,
-                onItemSelected: onItemSelected,
+                dataProvider: DefaultTabBarDataProvider(items: items, selectedItem: selectedItem),
+                delegate: delegate,
+                isAnimated: isAnimated,
                 content: tabContent
             )
         }
@@ -175,14 +193,16 @@ extension View {
         items: [TabBarItem],
         selectedItem: TabBarItem? = nil,
         state: TabBarState = .visible,
-        onItemSelected: @escaping (TabBarItem) -> Void = { _ in },
+        delegate: TabBarDelegate? = nil,
+        isAnimated: Bool = true,
         @ViewBuilder content: @escaping (TabBarItem) -> TabContent
     ) -> some View {
         modifier(TabBarModifier(
             items: items,
             selectedItem: selectedItem,
             state: state,
-            onItemSelected: onItemSelected,
+            delegate: delegate,
+            isAnimated: isAnimated,
             tabContent: content
         ))
     }
@@ -194,7 +214,8 @@ extension TabBar {
         TabBar<Content>(
             style: style,
             dataProvider: dataProvider,
-            onItemSelected: onItemSelected,
+            delegate: delegate,
+            isAnimated: isAnimated,
             content: content
         )
     }

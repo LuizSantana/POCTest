@@ -2,10 +2,11 @@ import SwiftUI
 
 // MARK: - ComponentStyle Pattern Example
 struct ComponentStyleExample: View {
-    @StateObject private var dataProvider = DefaultTabBarDataProvider()
+    @StateObject private var dataProvider = DefaultTabBarDataProvider(items: TabBarItemFactory.createDefaultItems())
     @State private var selectedStyle: TabBarStyleType = .default
     @State private var showTabBar = true
     @State private var isDarkMode = false
+    @StateObject private var tabBarDelegate = SampleTabBarDelegate()
     
     var body: some View {
         NavigationView {
@@ -14,10 +15,8 @@ struct ComponentStyleExample: View {
                 TabBar(
                     style: currentStyle,
                     dataProvider: dataProvider,
-                    items: TabBarItemFactory.createDefaultItems(),
-                    onItemSelected: { item in
-                        print("Selected: \(item.title ?? item.id)")
-                    }
+                    delegate: tabBarDelegate,
+                    isAnimated: true
                 ) { item in
                     TabContentView(item: item)
                 }

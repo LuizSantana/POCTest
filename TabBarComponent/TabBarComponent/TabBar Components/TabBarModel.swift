@@ -47,6 +47,19 @@ struct TabBarSelection {
     }
 }
 
+// MARK: - TabBar Actions
+enum TabBarAction {
+    case resetNavigationStack
+    case present
+    case push
+}
+
+// MARK: - TabBar Delegate
+protocol TabBarDelegate: AnyObject {
+    func tabBar(_ tabBar: TabBar<AnyView>, didSelectItem item: TabBarItem)
+    func tabBar(_ tabBar: TabBar<AnyView>, didPerformAction action: TabBarAction, for item: TabBarItem)
+}
+
 // MARK: - TabBar Configuration
 struct TabBarConfiguration {
     let items: [TabBarItem]

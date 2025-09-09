@@ -10,6 +10,7 @@ protocol TabBarDataProvider: ObservableObject {
     func selectItem(_ item: TabBarItem)
     func setState(_ state: TabBarState)
     func updateItems(_ items: [TabBarItem])
+    func performAction(_ action: TabBarAction, for item: TabBarItem)
 }
 
 // MARK: - Default TabBar Data Provider
@@ -18,6 +19,7 @@ class DefaultTabBarDataProvider: TabBarDataProvider {
     @Published var selectedItem: TabBarItem?
     @Published var state: TabBarState = .visible
     
+    weak var delegate: TabBarDelegate?
     private var cancellables = Set<AnyCancellable>()
     
     init(items: [TabBarItem] = [], selectedItem: TabBarItem? = nil) {
@@ -32,6 +34,7 @@ class DefaultTabBarDataProvider: TabBarDataProvider {
     
     func selectItem(_ item: TabBarItem) {
         selectedItem = item
+        delegate?.tabBar(TabBar<AnyView>(), didSelectItem: item)
     }
     
     func setState(_ state: TabBarState) {
@@ -46,6 +49,10 @@ class DefaultTabBarDataProvider: TabBarDataProvider {
            !items.contains(where: { $0.id == currentSelected.id }) {
             selectedItem = items.first
         }
+    }
+    
+    func performAction(_ action: TabBarAction, for item: TabBarItem) {
+        delegate?.tabBar(TabBar<AnyView>(), didPerformAction: action, for: item)
     }
 }
 
@@ -82,6 +89,10 @@ class MockTabBarDataProvider: TabBarDataProvider {
     
     func updateItems(_ items: [TabBarItem]) {
         self.items = items
+    }
+    
+    func performAction(_ action: TabBarAction, for item: TabBarItem) {
+        print("Mock: Performing action \(action) for item \(item.title ?? item.id)")
     }
 }
 
