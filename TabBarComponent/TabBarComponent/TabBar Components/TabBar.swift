@@ -29,7 +29,7 @@ struct TabBar<Content: View>: View {
     var body: some View {
         VStack(spacing: 0) {
             TabView(selection: $dataProvider.selectedItem) {
-                ForEach(dataProvider.items) { item in
+                ForEach(dataProvider.items()) { item in
                     content(item)
                         .tabItem {
                             TabBarItemLabel(item: item)
@@ -56,7 +56,7 @@ struct TabBar<Content: View>: View {
     
     private var configuration: TabBarStyleConfiguration {
         TabBarStyleConfiguration(
-            items: dataProvider.items,
+            items: dataProvider.items(),
             selectedItem: dataProvider.selectedItem,
             onItemSelected: { item in
                 dataProvider.selectItem(item)
@@ -166,9 +166,7 @@ extension TabBar {
 
 // MARK: - TabBar View Modifier
 struct TabBarModifier<TabContent: View>: ViewModifier {
-    let items: [TabBarItem]
-    let selectedItem: TabBarItem?
-    let state: TabBarState
+    let dataProvider: TabBarDataProvider
     let delegate: TabBarDelegate?
     let isAnimated: Bool
     let tabContent: (TabBarItem) -> TabContent
@@ -179,7 +177,7 @@ struct TabBarModifier<TabContent: View>: ViewModifier {
             
             TabBar(
                 style: DefaultTabBarStyle(),
-                dataProvider: DefaultTabBarDataProvider(items: items, selectedItem: selectedItem),
+                dataProvider: dataProvider as! DefaultTabBarDataProvider,
                 delegate: delegate,
                 isAnimated: isAnimated,
                 content: tabContent
@@ -190,17 +188,13 @@ struct TabBarModifier<TabContent: View>: ViewModifier {
 
 extension View {
     func tabBar<TabContent: View>(
-        items: [TabBarItem],
-        selectedItem: TabBarItem? = nil,
-        state: TabBarState = .visible,
+        dataProvider: TabBarDataProvider,
         delegate: TabBarDelegate? = nil,
         isAnimated: Bool = true,
         @ViewBuilder content: @escaping (TabBarItem) -> TabContent
     ) -> some View {
         modifier(TabBarModifier(
-            items: items,
-            selectedItem: selectedItem,
-            state: state,
+            dataProvider: dataProvider,
             delegate: delegate,
             isAnimated: isAnimated,
             tabContent: content
@@ -210,10 +204,10 @@ extension View {
 
 // MARK: - TabBar Data Provider Binding
 extension TabBar {
-    func bind(to dataProvider: DefaultTabBarDataProvider) -> TabBar<Content> {
+    func bind(to dataProvider: TabBarDataProvider) -> TabBar<Content> {
         TabBar<Content>(
             style: style,
-            dataProvider: dataProvider,
+            dataProvider: dataProvider as! DefaultTabBarDataProvider,
             delegate: delegate,
             isAnimated: isAnimated,
             content: content

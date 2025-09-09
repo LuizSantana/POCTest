@@ -2,19 +2,14 @@ import Foundation
 import Combine
 
 // MARK: - TabBar Data Provider Protocol
-protocol TabBarDataProvider: ObservableObject {
-    var items: [TabBarItem] { get }
-    var selectedItem: TabBarItem? { get }
-    var state: TabBarState { get }
-    
-    func selectItem(_ item: TabBarItem)
-    func setState(_ state: TabBarState)
-    func updateItems(_ items: [TabBarItem])
-    func performAction(_ action: TabBarAction, for item: TabBarItem)
+protocol TabBarDataProvider: AnyObject {
+    func items() -> [TabBarItem]
+    func action(for tabItem: TabBarItem) -> TabBarAction?
+    func controller(for tabItem: TabBarItem) -> UIViewController?
 }
 
 // MARK: - Default TabBar Data Provider
-class DefaultTabBarDataProvider: TabBarDataProvider {
+class DefaultTabBarDataProvider: TabBarDataProvider, ObservableObject {
     @Published var items: [TabBarItem] = []
     @Published var selectedItem: TabBarItem?
     @Published var state: TabBarState = .visible
@@ -32,6 +27,37 @@ class DefaultTabBarDataProvider: TabBarDataProvider {
         }
     }
     
+    // MARK: - TabBarDataProvider Protocol
+    func items() -> [TabBarItem] {
+        return self.items
+    }
+    
+    func action(for tabItem: TabBarItem) -> TabBarAction? {
+        // Default implementation - can be overridden by subclasses
+        switch tabItem.identifier {
+        case "home":
+            return .push
+        case "search":
+            return .present
+        case "favorites":
+            return .push
+        case "profile":
+            return .present
+        case "settings":
+            return .present
+        default:
+            return .push
+        }
+    }
+    
+    func controller(for tabItem: TabBarItem) -> UIViewController? {
+        // Default implementation - can be overridden by subclasses
+        let viewController = UIHostingController(rootView: TabContentView(item: tabItem))
+        viewController.title = tabItem.title
+        return viewController
+    }
+    
+    // MARK: - Additional Methods for Internal Use
     func selectItem(_ item: TabBarItem) {
         selectedItem = item
         delegate?.tabBar(TabBar<AnyView>(), didSelectItem: item)
@@ -57,7 +83,7 @@ class DefaultTabBarDataProvider: TabBarDataProvider {
 }
 
 // MARK: - Mock TabBar Data Provider
-class MockTabBarDataProvider: TabBarDataProvider {
+class MockTabBarDataProvider: TabBarDataProvider, ObservableObject {
     @Published var items: [TabBarItem] = []
     @Published var selectedItem: TabBarItem?
     @Published var state: TabBarState = .visible
@@ -77,6 +103,24 @@ class MockTabBarDataProvider: TabBarDataProvider {
         self.onStateChanged = onStateChanged
     }
     
+    // MARK: - TabBarDataProvider Protocol
+    func items() -> [TabBarItem] {
+        return self.items
+    }
+    
+    func action(for tabItem: TabBarItem) -> TabBarAction? {
+        // Mock implementation
+        return .push
+    }
+    
+    func controller(for tabItem: TabBarItem) -> UIViewController? {
+        // Mock implementation
+        let viewController = UIHostingController(rootView: TabContentView(item: tabItem))
+        viewController.title = tabItem.title
+        return viewController
+    }
+    
+    // MARK: - Additional Methods for Internal Use
     func selectItem(_ item: TabBarItem) {
         selectedItem = item
         onItemSelected(item)
