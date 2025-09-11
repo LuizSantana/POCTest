@@ -2,7 +2,7 @@ import SwiftUI
 
 // MARK: - TabBar Example Usage
 struct TabBarExample: View {
-    @StateObject private var dataProvider = DefaultTabBarDataProvider(items: TabBarItemFactory.createDefaultItems())
+    @State private var dataProvider = MockTabBarDataProvider(items: TabBarItemFactory.createDefaultItems())
     @State private var showTabBar = true
     @StateObject private var tabBarDelegate = SampleTabBarDelegate()
     
@@ -62,7 +62,7 @@ struct TabBarExample: View {
 
 // MARK: - Multiple Style Examples
 struct TabBarStyleExamples: View {
-    @StateObject private var dataProvider = DefaultTabBarDataProvider(items: TabBarItemFactory.createDefaultItems())
+    @State private var dataProvider = MockTabBarDataProvider(items: TabBarItemFactory.createDefaultItems())
     @StateObject private var tabBarDelegate = SampleTabBarDelegate()
     
     var body: some View {
@@ -124,7 +124,7 @@ struct TabBarStyleExamples: View {
 
 // MARK: - Composable Style Example
 struct ComposableStyleExample: View {
-    @StateObject private var dataProvider = DefaultTabBarDataProvider(items: TabBarItemFactory.createDefaultItems())
+    @State private var dataProvider = MockTabBarDataProvider(items: TabBarItemFactory.createDefaultItems())
     @StateObject private var tabBarDelegate = SampleTabBarDelegate()
     
     var body: some View {

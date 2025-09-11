@@ -2,33 +2,33 @@ import SwiftUI
 
 // MARK: - TabBar Component (TabView-based)
 struct TabBar<Content: View>: View {
-    @StateObject private var dataProvider: DefaultTabBarDataProvider
+    private let dataProvider: MockTabBarDataProvider
     private let style: any TabBarStyle
     private let delegate: TabBarDelegate?
     private let isAnimated: Bool
+    
+    @State private var selectedItem: TabBarItem?
     
     private let content: (TabBarItem) -> Content
     
     init(
         style: any TabBarStyle,
-        dataProvider: DefaultTabBarDataProvider,
+        dataProvider: MockTabBarDataProvider,
         delegate: TabBarDelegate? = nil,
         isAnimated: Bool = true,
         @ViewBuilder content: @escaping (TabBarItem) -> Content
     ) {
         self.style = style
+        self.dataProvider = dataProvider
         self.delegate = delegate
         self.isAnimated = isAnimated
         self.content = content
-        
-        // Set delegate on data provider before creating StateObject
-        dataProvider.delegate = delegate
-        self._dataProvider = StateObject(wrappedValue: dataProvider)
+        self._selectedItem = State(initialValue: dataProvider.items().first)
     }
     
     var body: some View {
         VStack(spacing: 0) {
-            TabView(selection: $dataProvider.selectedItem) {
+            TabView(selection: $selectedItem) {
                 ForEach(dataProvider.items()) { item in
                     content(item)
                         .tabItem {
@@ -41,14 +41,12 @@ struct TabBar<Content: View>: View {
             
             // Custom TabBar styling overlay
             AnyView(style.makeBody(configuration: configuration))
-                .opacity(dataProvider.state.isVisible ? 1 : 0)
-                .animation(isAnimated ? .easeInOut(duration: 0.3) : nil, value: dataProvider.state)
         }
         .modifier(OnChangeModifier(
-            value: dataProvider.selectedItem,
+            value: selectedItem,
             action: { newValue in
                 if let newValue = newValue {
-                    delegate?.tabBar(TabBar<AnyView>(), didSelectItem: newValue)
+                    delegate?.tabBar(TabBar<AnyView>(style: DefaultTabBarStyle(), dataProvider: MockTabBarDataProvider(), delegate: nil, isAnimated: true) { _ in AnyView(EmptyView()) }, didSelectItem: newValue)
                 }
             }
         ))
@@ -57,11 +55,11 @@ struct TabBar<Content: View>: View {
     private var configuration: TabBarStyleConfiguration {
         TabBarStyleConfiguration(
             items: dataProvider.items(),
-            selectedItem: dataProvider.selectedItem,
+            selectedItem: selectedItem,
             onItemSelected: { item in
-                dataProvider.selectItem(item)
+                selectedItem = item
             },
-            state: dataProvider.state
+            state: .visible
         )
     }
 }
@@ -155,7 +153,7 @@ extension TabBar {
     ) {
         self.init(
             style: DefaultTabBarStyle(),
-            dataProvider: DefaultTabBarDataProvider(items: items, selectedItem: selectedItem),
+            dataProvider: MockTabBarDataProvider(items: items, selectedItem: selectedItem),
             delegate: delegate,
             isAnimated: isAnimated,
             content: content
@@ -177,7 +175,7 @@ struct TabBarModifier<TabContent: View>: ViewModifier {
             
             TabBar(
                 style: DefaultTabBarStyle(),
-                dataProvider: dataProvider as! DefaultTabBarDataProvider,
+                dataProvider: dataProvider as! MockTabBarDataProvider,
                 delegate: delegate,
                 isAnimated: isAnimated,
                 content: tabContent

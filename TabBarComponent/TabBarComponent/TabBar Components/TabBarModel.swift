@@ -1,8 +1,10 @@
 import Foundation
+import SwiftUI
 
 // MARK: - TabBar Item Model
 struct TabBarItem: Identifiable, Equatable, Hashable {
     let id: String
+    let identifier: String
     let title: String?
     let icon: String
     let deeplink: String
@@ -18,6 +20,7 @@ struct TabBarItem: Identifiable, Equatable, Hashable {
         analytics: String
     ) {
         self.id = identifier
+        self.identifier = identifier
         self.title = title
         self.icon = icon
         self.deeplink = deeplink

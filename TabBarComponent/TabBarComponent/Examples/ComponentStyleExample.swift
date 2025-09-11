@@ -2,7 +2,7 @@ import SwiftUI
 
 // MARK: - ComponentStyle Pattern Example
 struct ComponentStyleExample: View {
-    @StateObject private var dataProvider = DefaultTabBarDataProvider(items: TabBarItemFactory.createDefaultItems())
+    @State private var dataProvider = MockTabBarDataProvider(items: TabBarItemFactory.createDefaultItems())
     @State private var selectedStyle: TabBarStyleType = .default
     @State private var showTabBar = true
     @State private var isDarkMode = false

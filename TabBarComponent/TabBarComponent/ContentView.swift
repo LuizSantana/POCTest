@@ -1,7 +1,7 @@
 import SwiftUI
 
 // MARK: - Sample TabBar Delegate
-class SampleTabBarDelegate: TabBarDelegate {
+class SampleTabBarDelegate: TabBarDelegate, ObservableObject {
     func tabBar(_ tabBar: TabBar<AnyView>, didSelectItem item: TabBarItem) {
         print("TabBar delegate: Selected item \(item.title ?? item.id)")
     }
@@ -12,7 +12,7 @@ class SampleTabBarDelegate: TabBarDelegate {
 }
 
 struct ContentView: View {
-    @StateObject private var dataProvider = DefaultTabBarDataProvider(items: TabBarItemFactory.createDefaultItems())
+    @State private var dataProvider = MockTabBarDataProvider(items: TabBarItemFactory.createDefaultItems())
     @State private var selectedStyle: TabBarStyleType = .default
     @State private var showTabBar = true
     @State private var isDarkMode = false
