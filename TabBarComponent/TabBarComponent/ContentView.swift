@@ -2,11 +2,11 @@ import SwiftUI
 
 // MARK: - Sample TabBar Delegate
 class SampleTabBarDelegate: TabBarDelegate, ObservableObject {
-    func tabBar(_ tabBar: TabBar<AnyView>, didSelectItem item: TabBarItem) {
+    func tabBar(_ tabBar: any View, didSelectItem item: TabBarItem) {
         print("TabBar delegate: Selected item \(item.title ?? item.id)")
     }
     
-    func tabBar(_ tabBar: TabBar<AnyView>, didPerformAction action: TabBarAction, for item: TabBarItem) {
+    func tabBar(_ tabBar: any View, didPerformAction action: TabBarAction, for item: TabBarItem) {
         print("TabBar delegate: Performed action \(action) for item \(item.title ?? item.id)")
     }
 }
@@ -22,7 +22,7 @@ struct ContentView: View {
         NavigationView {
             VStack(spacing: 0) {
                 // Main content area
-                TabBar(
+                ItauSwiftUI.TabBar(
                     style: currentStyle,
                     dataProvider: dataProvider,
                     delegate: tabBarDelegate,
@@ -85,7 +85,7 @@ enum TabBarStyleType: String, CaseIterable {
 
 struct ControlPanel: View {
     @Binding var selectedStyle: TabBarStyleType
-    @ObservedObject var dataProvider: DefaultTabBarDataProvider
+    @ObservedObject var dataProvider:MockTabBarDataProvider
     @Binding var showTabBar: Bool
     @Binding var isDarkMode: Bool
     
@@ -123,7 +123,7 @@ struct ControlPanel: View {
                     
                     Button("Toggle TabBar") {
                         withAnimation(.easeInOut(duration: 0.3)) {
-                            dataProvider.setState(dataProvider.state == .visible ? .hidden : .visible)
+                            dataProvider.setState(dataProvider.currentState == TabBarState.visible ? TabBarState.hidden : TabBarState.visible)
                         }
                     }
                     .buttonStyle(.bordered)

@@ -12,7 +12,7 @@ struct ComponentStyleExample: View {
         NavigationView {
             VStack(spacing: 0) {
                 // Main content area with environment-based styling
-                TabBar(
+                ItauSwiftUI.TabBar(
                     style: currentStyle,
                     dataProvider: dataProvider,
                     delegate: tabBarDelegate,
@@ -100,7 +100,7 @@ struct EnhancedControlPanel: View {
                     
                     Button("Toggle TabBar") {
                         withAnimation(.easeInOut(duration: 0.3)) {
-                            dataProvider.setState(dataProvider.state == .visible ? .hidden : .visible)
+                            dataProvider.setState(dataProvider.currentState == TabBarState.visible ? TabBarState.hidden : TabBarState.visible)
                         }
                     }
                     .buttonStyle(.bordered)

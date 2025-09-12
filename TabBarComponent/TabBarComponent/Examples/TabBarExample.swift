@@ -10,7 +10,7 @@ struct TabBarExample: View {
         NavigationView {
             VStack {
                 // Content area
-                TabBar(
+                ItauSwiftUI.TabBar(
                     style: DefaultTabBarStyle()
                         .background(Color(.systemBackground))
                         .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: -4),
@@ -68,7 +68,7 @@ struct TabBarStyleExamples: View {
     var body: some View {
         TabView {
             // Default Style
-            TabBar(
+            ItauSwiftUI.TabBar(
                 style: DefaultTabBarStyle(),
                 dataProvider: dataProvider,
                 delegate: tabBarDelegate,
@@ -81,7 +81,7 @@ struct TabBarStyleExamples: View {
             }
             
             // Compact Style
-            TabBar(
+            ItauSwiftUI.TabBar(
                 style: CompactTabBarStyle(),
                 dataProvider: dataProvider,
                 delegate: tabBarDelegate,
@@ -94,7 +94,7 @@ struct TabBarStyleExamples: View {
             }
             
             // Floating Style
-            TabBar(
+            ItauSwiftUI.TabBar(
                 style: FloatingTabBarStyle(),
                 dataProvider: dataProvider,
                 delegate: tabBarDelegate,
@@ -107,7 +107,7 @@ struct TabBarStyleExamples: View {
             }
             
             // Minimal Style
-            TabBar(
+            ItauSwiftUI.TabBar(
                 style: MinimalTabBarStyle(),
                 dataProvider: dataProvider,
                 delegate: tabBarDelegate,
@@ -128,7 +128,7 @@ struct ComposableStyleExample: View {
     @StateObject private var tabBarDelegate = SampleTabBarDelegate()
     
     var body: some View {
-        TabBar(
+        ItauSwiftUI.TabBar(
             style: DefaultTabBarStyle()
                 .background(Color.blue.opacity(0.1), cornerRadius: 20)
                 .shadow(color: .blue.opacity(0.3), radius: 12, x: 0, y: 6)

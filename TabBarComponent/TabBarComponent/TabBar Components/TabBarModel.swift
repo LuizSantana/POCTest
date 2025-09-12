@@ -59,8 +59,8 @@ enum TabBarAction {
 
 // MARK: - TabBar Delegate
 protocol TabBarDelegate: AnyObject {
-    func tabBar(_ tabBar: TabBar<AnyView>, didSelectItem item: TabBarItem)
-    func tabBar(_ tabBar: TabBar<AnyView>, didPerformAction action: TabBarAction, for item: TabBarItem)
+    func tabBar(_ tabBar: any View, didSelectItem item: TabBarItem)
+    func tabBar(_ tabBar: any View, didPerformAction action: TabBarAction, for item: TabBarItem)
 }
 
 // MARK: - TabBar Configuration
