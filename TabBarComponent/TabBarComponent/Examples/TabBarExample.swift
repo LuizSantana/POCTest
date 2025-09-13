@@ -17,9 +17,7 @@ struct TabBarExample: View {
                     dataProvider: dataProvider,
                     delegate: tabBarDelegate,
                     isAnimated: true
-                ) { item in
-                    TabContentView(item: item)
-                }
+                )
                 
                 // Control buttons
                 VStack(spacing: 16) {
@@ -73,9 +71,7 @@ struct TabBarStyleExamples: View {
                 dataProvider: dataProvider,
                 delegate: tabBarDelegate,
                 isAnimated: true
-            ) { item in
-                TabContentView(item: item)
-            }
+            )
             .tabItem {
                 Label("Default", systemImage: "rectangle.3.group")
             }
@@ -86,9 +82,7 @@ struct TabBarStyleExamples: View {
                 dataProvider: dataProvider,
                 delegate: tabBarDelegate,
                 isAnimated: true
-            ) { item in
-                TabContentView(item: item)
-            }
+            )
             .tabItem {
                 Label("Compact", systemImage: "rectangle.compress.vertical")
             }
@@ -99,9 +93,7 @@ struct TabBarStyleExamples: View {
                 dataProvider: dataProvider,
                 delegate: tabBarDelegate,
                 isAnimated: true
-            ) { item in
-                TabContentView(item: item)
-            }
+            )
             .tabItem {
                 Label("Floating", systemImage: "circle.hexagongrid")
             }
@@ -112,9 +104,7 @@ struct TabBarStyleExamples: View {
                 dataProvider: dataProvider,
                 delegate: tabBarDelegate,
                 isAnimated: true
-            ) { item in
-                TabContentView(item: item)
-            }
+            )
             .tabItem {
                 Label("Minimal", systemImage: "minus.circle")
             }
@@ -136,9 +126,7 @@ struct ComposableStyleExample: View {
             dataProvider: dataProvider,
             delegate: tabBarDelegate,
             isAnimated: true
-        ) { item in
-            TabContentView(item: item)
-        }
+        )
     }
 }
 

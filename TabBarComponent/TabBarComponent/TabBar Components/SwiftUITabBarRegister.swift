@@ -171,9 +171,7 @@ class SwiftUITabBarRegister {
             dataProvider: dataProvider,
             delegate: delegate,
             isAnimated: config.isAnimated
-        ) { item in
-            TabContentView(item: item)
-        }
+        )
         .preferredColorScheme(config.isDarkMode ? .dark : .light)
         
         let hostingController = UIHostingController(rootView: tabBarView)

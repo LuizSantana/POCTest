@@ -17,9 +17,7 @@ struct ComponentStyleExample: View {
                     dataProvider: dataProvider,
                     delegate: tabBarDelegate,
                     isAnimated: true
-                ) { item in
-                    TabContentView(item: item)
-                }
+                )
                 .environment(\.colorScheme, isDarkMode ? .dark : .light)
                 .onAppear {
                     dataProvider.setState(showTabBar ? .visible : .hidden)

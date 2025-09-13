@@ -27,9 +27,7 @@ struct ContentView: View {
                     dataProvider: dataProvider,
                     delegate: tabBarDelegate,
                     isAnimated: true
-                ) { item in
-                    TabContentView(item: item)
-                }
+                )
                 
                 // Control panel
                 if showTabBar {

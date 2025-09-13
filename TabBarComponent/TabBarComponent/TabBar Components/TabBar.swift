@@ -3,7 +3,7 @@ import SwiftUI
 // MARK: - ItauSwiftUI Namespace
 struct ItauSwiftUI {
     // MARK: - TabBar Component (TabView-based)
-    struct TabBar<Content: View>: View {
+    struct TabBar: View {
         private let dataProvider: MockTabBarDataProvider
         private let style: any TabBarStyle
         private let delegate: TabBarDelegate?
@@ -11,20 +11,16 @@ struct ItauSwiftUI {
         
         @State private var selectedItem: TabBarItem?
         
-        private let content: (TabBarItem) -> Content
-        
         init(
             style: any TabBarStyle,
             dataProvider: MockTabBarDataProvider,
             delegate: TabBarDelegate? = nil,
-            isAnimated: Bool = true,
-            @ViewBuilder content: @escaping (TabBarItem) -> Content
+            isAnimated: Bool = true
         ) {
             self.style = style
             self.dataProvider = dataProvider
             self.delegate = delegate
             self.isAnimated = isAnimated
-            self.content = content
             self._selectedItem = State(initialValue: dataProvider.items().first)
         }
         
@@ -32,7 +28,7 @@ struct ItauSwiftUI {
             VStack(spacing: 0) {
                 TabView(selection: $selectedItem) {
                     ForEach(dataProvider.items()) { item in
-                        content(item)
+                        TabContentView(item: item)
                             .tabItem {
                                 TabBarItemLabel(item: item)
                             }
@@ -87,59 +83,56 @@ struct ItauSwiftUI {
 
 // MARK: - TabBar Modifiers
 extension ItauSwiftUI.TabBar {
-    func tabBarStyle(_ style: any TabBarStyle) -> ItauSwiftUI.TabBar<Content> {
-        ItauSwiftUI.TabBar<Content>(
+    func tabBarStyle(_ style: any TabBarStyle) -> ItauSwiftUI.TabBar {
+        ItauSwiftUI.TabBar(
             style: style,
             dataProvider: dataProvider,
             delegate: delegate,
-            isAnimated: isAnimated,
-            content: content
+            isAnimated: isAnimated
         )
     }
     
-    func items(_ items: [TabBarItem]) -> ItauSwiftUI.TabBar<Content> {
+    func items(_ items: [TabBarItem]) -> ItauSwiftUI.TabBar {
         dataProvider.updateItems(items)
         return self
     }
     
-    func selectedItem(_ item: TabBarItem?) -> ItauSwiftUI.TabBar<Content> {
+    func selectedItem(_ item: TabBarItem?) -> ItauSwiftUI.TabBar {
         if let item = item {
             dataProvider.selectItem(item)
         }
         return self
     }
     
-    func state(_ state: TabBarState) -> ItauSwiftUI.TabBar<Content> {
+    func state(_ state: TabBarState) -> ItauSwiftUI.TabBar {
         dataProvider.setState(state)
         return self
     }
     
-    func delegate(_ delegate: TabBarDelegate?) -> ItauSwiftUI.TabBar<Content> {
-        ItauSwiftUI.TabBar<Content>(
+    func delegate(_ delegate: TabBarDelegate?) -> ItauSwiftUI.TabBar {
+        ItauSwiftUI.TabBar(
             style: style,
             dataProvider: dataProvider,
             delegate: delegate,
-            isAnimated: isAnimated,
-            content: content
+            isAnimated: isAnimated
         )
     }
     
-    func animated(_ isAnimated: Bool) -> ItauSwiftUI.TabBar<Content> {
-        ItauSwiftUI.TabBar<Content>(
+    func animated(_ isAnimated: Bool) -> ItauSwiftUI.TabBar {
+        ItauSwiftUI.TabBar(
             style: style,
             dataProvider: dataProvider,
             delegate: delegate,
-            isAnimated: isAnimated,
-            content: content
+            isAnimated: isAnimated
         )
     }
     
-    func show() -> ItauSwiftUI.TabBar<Content> {
+    func show() -> ItauSwiftUI.TabBar {
         dataProvider.setState(TabBarState.visible)
         return self
     }
     
-    func hide() -> ItauSwiftUI.TabBar<Content> {
+    func hide() -> ItauSwiftUI.TabBar {
         dataProvider.setState(TabBarState.hidden)
         return self
     }
@@ -151,25 +144,22 @@ extension ItauSwiftUI.TabBar {
         items: [TabBarItem] = [],
         selectedItem: TabBarItem? = nil,
         delegate: TabBarDelegate? = nil,
-        isAnimated: Bool = true,
-        @ViewBuilder content: @escaping (TabBarItem) -> Content
+        isAnimated: Bool = true
     ) {
         self.init(
             style: DefaultTabBarStyle(),
             dataProvider: MockTabBarDataProvider(items: items, selectedItem: selectedItem),
             delegate: delegate,
-            isAnimated: isAnimated,
-            content: content
+            isAnimated: isAnimated
         )
     }
 }
 
 // MARK: - TabBar View Modifier
-struct TabBarModifier<TabContent: View>: ViewModifier {
+struct TabBarModifier: ViewModifier {
     let dataProvider: TabBarDataProvider
     let delegate: TabBarDelegate?
     let isAnimated: Bool
-    let tabContent: (TabBarItem) -> TabContent
     
     func body(content: Content) -> some View {
         VStack(spacing: 0) {
@@ -179,38 +169,34 @@ struct TabBarModifier<TabContent: View>: ViewModifier {
                 style: DefaultTabBarStyle(),
                 dataProvider: dataProvider as! MockTabBarDataProvider,
                 delegate: delegate,
-                isAnimated: isAnimated,
-                content: tabContent
+                isAnimated: isAnimated
             )
         }
     }
 }
 
 extension View {
-    func tabBar<TabContent: View>(
+    func tabBar(
         dataProvider: TabBarDataProvider,
         delegate: TabBarDelegate? = nil,
-        isAnimated: Bool = true,
-        @ViewBuilder content: @escaping (TabBarItem) -> TabContent
+        isAnimated: Bool = true
     ) -> some View {
         modifier(TabBarModifier(
             dataProvider: dataProvider,
             delegate: delegate,
-            isAnimated: isAnimated,
-            tabContent: content
+            isAnimated: isAnimated
         ))
     }
 }
 
 // MARK: - TabBar Data Provider Binding
 extension ItauSwiftUI.TabBar {
-    func bind(to dataProvider: TabBarDataProvider) -> ItauSwiftUI.TabBar<Content> {
-        ItauSwiftUI.TabBar<Content>(
+    func bind(to dataProvider: TabBarDataProvider) -> ItauSwiftUI.TabBar {
+        ItauSwiftUI.TabBar(
             style: style,
             dataProvider: dataProvider as! MockTabBarDataProvider,
             delegate: delegate,
-            isAnimated: isAnimated,
-            content: content
+            isAnimated: isAnimated
         )
     }
 }
