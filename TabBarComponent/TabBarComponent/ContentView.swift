@@ -12,7 +12,7 @@ class SampleTabBarDelegate: TabBarDelegate, ObservableObject {
 }
 
 struct ContentView: View {
-    @State private var dataProvider = MockTabBarDataProvider(items: TabBarItemFactory.createDefaultItems())
+    @State private var dataSource = MockTabBarDataSource(itens: TabBarItemFactory.createDefaultItens())
     @State private var selectedStyle: TabBarStyleType = .default
     @State private var showTabBar = true
     @State private var isDarkMode = false
@@ -24,7 +24,7 @@ struct ContentView: View {
                 // Main content area
                 ItauSwiftUI.TabBar(
                     style: currentStyle,
-                    dataProvider: dataProvider,
+                    dataSource: dataSource,
                     delegate: tabBarDelegate,
                     isAnimated: true
                 )
@@ -33,7 +33,7 @@ struct ContentView: View {
                 if showTabBar {
                     ControlPanel(
                         selectedStyle: $selectedStyle,
-                        dataProvider: dataProvider,
+                        dataSource: dataSource,
                         showTabBar: $showTabBar,
                         isDarkMode: $isDarkMode
                     )
@@ -83,7 +83,7 @@ enum TabBarStyleType: String, CaseIterable {
 
 struct ControlPanel: View {
     @Binding var selectedStyle: TabBarStyleType
-    @ObservedObject var dataProvider:MockTabBarDataProvider
+    @ObservedObject var dataSource: MockTabBarDataSource
     @Binding var showTabBar: Bool
     @Binding var isDarkMode: Bool
     
@@ -121,7 +121,7 @@ struct ControlPanel: View {
                     
                     Button("Toggle TabBar") {
                         withAnimation(.easeInOut(duration: 0.3)) {
-                            dataProvider.setState(dataProvider.currentState == TabBarState.visible ? TabBarState.hidden : TabBarState.visible)
+                            dataSource.state = dataSource.currentState == TabBarState.visible ? TabBarState.hidden : TabBarState.visible
                         }
                     }
                     .buttonStyle(.bordered)
@@ -130,12 +130,12 @@ struct ControlPanel: View {
                 // Item controls
                 HStack(spacing: 16) {
                     Button("Default Items") {
-                        dataProvider.updateItems(TabBarItemFactory.createDefaultItems())
+                        dataSource._itens = TabBarItemFactory.createDefaultItens()
                     }
                     .buttonStyle(.bordered)
                     
                     Button("Extended Items") {
-                        dataProvider.updateItems(TabBarItemFactory.createExtendedItems())
+                        dataSource._itens = TabBarItemFactory.createExtendedItens()
                     }
                     .buttonStyle(.bordered)
                 }

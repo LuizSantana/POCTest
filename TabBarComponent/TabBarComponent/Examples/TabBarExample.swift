@@ -2,7 +2,7 @@ import SwiftUI
 
 // MARK: - TabBar Example Usage
 struct TabBarExample: View {
-    @State private var dataProvider = MockTabBarDataProvider(items: TabBarItemFactory.createDefaultItems())
+    @State private var dataSource = MockTabBarDataSource(itens: TabBarItemFactory.createDefaultItens())
     @State private var showTabBar = true
     @StateObject private var tabBarDelegate = SampleTabBarDelegate()
     
@@ -14,7 +14,7 @@ struct TabBarExample: View {
                     style: DefaultTabBarStyle()
                         .background(Color(.systemBackground))
                         .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: -4),
-                    dataProvider: dataProvider,
+                    dataSource: dataSource,
                     delegate: tabBarDelegate,
                     isAnimated: true
                 )
@@ -23,12 +23,12 @@ struct TabBarExample: View {
                 VStack(spacing: 16) {
                     HStack(spacing: 16) {
                         Button("Show TabBar") {
-                            dataProvider.setState(.visible)
+                            dataSource.state = .visible
                         }
                         .buttonStyle(.bordered)
                         
                         Button("Hide TabBar") {
-                            dataProvider.setState(.hidden)
+                            dataSource.state = .hidden
                         }
                         .buttonStyle(.bordered)
                     }
@@ -60,7 +60,7 @@ struct TabBarExample: View {
 
 // MARK: - Multiple Style Examples
 struct TabBarStyleExamples: View {
-    @State private var dataProvider = MockTabBarDataProvider(items: TabBarItemFactory.createDefaultItems())
+    @State private var dataSource = MockTabBarDataSource(itens: TabBarItemFactory.createDefaultItens())
     @StateObject private var tabBarDelegate = SampleTabBarDelegate()
     
     var body: some View {
@@ -68,7 +68,7 @@ struct TabBarStyleExamples: View {
             // Default Style
             ItauSwiftUI.TabBar(
                 style: DefaultTabBarStyle(),
-                dataProvider: dataProvider,
+                dataSource: dataSource,
                 delegate: tabBarDelegate,
                 isAnimated: true
             )
@@ -79,7 +79,7 @@ struct TabBarStyleExamples: View {
             // Compact Style
             ItauSwiftUI.TabBar(
                 style: CompactTabBarStyle(),
-                dataProvider: dataProvider,
+                dataSource: dataSource,
                 delegate: tabBarDelegate,
                 isAnimated: true
             )
@@ -90,7 +90,7 @@ struct TabBarStyleExamples: View {
             // Floating Style
             ItauSwiftUI.TabBar(
                 style: FloatingTabBarStyle(),
-                dataProvider: dataProvider,
+                dataSource: dataSource,
                 delegate: tabBarDelegate,
                 isAnimated: true
             )
@@ -101,7 +101,7 @@ struct TabBarStyleExamples: View {
             // Minimal Style
             ItauSwiftUI.TabBar(
                 style: MinimalTabBarStyle(),
-                dataProvider: dataProvider,
+                dataSource: dataSource,
                 delegate: tabBarDelegate,
                 isAnimated: true
             )
@@ -114,7 +114,7 @@ struct TabBarStyleExamples: View {
 
 // MARK: - Composable Style Example
 struct ComposableStyleExample: View {
-    @State private var dataProvider = MockTabBarDataProvider(items: TabBarItemFactory.createDefaultItems())
+    @State private var dataSource = MockTabBarDataSource(itens: TabBarItemFactory.createDefaultItens())
     @StateObject private var tabBarDelegate = SampleTabBarDelegate()
     
     var body: some View {
@@ -123,7 +123,7 @@ struct ComposableStyleExample: View {
                 .background(Color.blue.opacity(0.1), cornerRadius: 20)
                 .shadow(color: .blue.opacity(0.3), radius: 12, x: 0, y: 6)
                 .padding(horizontal: 20, vertical: 12),
-            dataProvider: dataProvider,
+            dataSource: dataSource,
             delegate: tabBarDelegate,
             isAnimated: true
         )

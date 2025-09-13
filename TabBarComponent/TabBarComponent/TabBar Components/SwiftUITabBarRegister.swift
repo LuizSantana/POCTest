@@ -163,12 +163,12 @@ class SwiftUITabBarRegister {
     
     private func createHostingController(with config: RegisterTabBarConfiguration) -> Any {
         #if canImport(UIKit)
-        let dataProvider = MockTabBarDataProvider(items: config.items)
+        let dataSource = MockTabBarDataSource(itens: config.items)
         let delegate = RegisterTabBarDelegate()
         
         let tabBarView = ItauSwiftUI.TabBar(
             style: config.style,
-            dataProvider: dataProvider,
+            dataSource: dataSource,
             delegate: delegate,
             isAnimated: config.isAnimated
         )

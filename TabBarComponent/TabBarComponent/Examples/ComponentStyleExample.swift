@@ -2,7 +2,7 @@ import SwiftUI
 
 // MARK: - ComponentStyle Pattern Example
 struct ComponentStyleExample: View {
-    @State private var dataProvider = MockTabBarDataProvider(items: TabBarItemFactory.createDefaultItems())
+    @State private var dataSource = MockTabBarDataSource(itens: TabBarItemFactory.createDefaultItens())
     @State private var selectedStyle: TabBarStyleType = .default
     @State private var showTabBar = true
     @State private var isDarkMode = false
@@ -14,22 +14,22 @@ struct ComponentStyleExample: View {
                 // Main content area with environment-based styling
                 ItauSwiftUI.TabBar(
                     style: currentStyle,
-                    dataProvider: dataProvider,
+                    dataSource: dataSource,
                     delegate: tabBarDelegate,
                     isAnimated: true
                 )
                 .environment(\.colorScheme, isDarkMode ? .dark : .light)
                 .onAppear {
-                    dataProvider.setState(showTabBar ? .visible : .hidden)
+                    dataSource.state = showTabBar ? .visible : .hidden
                 }
                 .onChange(of: showTabBar) { newValue in
-                    dataProvider.setState(newValue ? .visible : .hidden)
+                    dataSource.state = newValue ? .visible : .hidden
                 }
                 
                 // Control panel
                 ControlPanel(
                     selectedStyle: $selectedStyle,
-                    dataProvider: dataProvider,
+                        dataSource: dataSource,
                     showTabBar: $showTabBar,
                     isDarkMode: $isDarkMode
                 )
@@ -61,7 +61,7 @@ struct ComponentStyleExample: View {
 // MARK: - Enhanced Control Panel
 struct EnhancedControlPanel: View {
     @Binding var selectedStyle: TabBarStyleType
-    @ObservedObject var dataProvider: DefaultTabBarDataProvider
+    @ObservedObject var dataSource: DefaultTabBarDataSource
     @Binding var isDarkMode: Bool
     
     var body: some View {
@@ -98,7 +98,7 @@ struct EnhancedControlPanel: View {
                     
                     Button("Toggle TabBar") {
                         withAnimation(.easeInOut(duration: 0.3)) {
-                            dataProvider.setState(dataProvider.currentState == TabBarState.visible ? TabBarState.hidden : TabBarState.visible)
+                            dataSource.state = dataSource.currentState == TabBarState.visible ? TabBarState.hidden : TabBarState.visible
                         }
                     }
                     .buttonStyle(.bordered)
@@ -107,12 +107,12 @@ struct EnhancedControlPanel: View {
                 // Item controls
                 HStack(spacing: 16) {
                     Button("Default Items") {
-                        dataProvider.updateItems(TabBarItemFactory.createDefaultItems())
+                        dataSource._itens = TabBarItemFactory.createDefaultItens()
                     }
                     .buttonStyle(.bordered)
                     
                     Button("Extended Items") {
-                        dataProvider.updateItems(TabBarItemFactory.createExtendedItems())
+                        dataSource._itens = TabBarItemFactory.createExtendedItens()
                     }
                     .buttonStyle(.bordered)
                 }
