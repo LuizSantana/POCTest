@@ -1,7 +1,5 @@
 import SwiftUI
-#if canImport(UIKit)
 import UIKit
-#endif
 
 // MARK: - SwiftUI TabBar Register
 class SwiftUITabBarRegister {
@@ -14,7 +12,6 @@ class SwiftUITabBarRegister {
         static let delegate = "delegate"
         static let isAnimated = "isAnimated"
         static let showTabBar = "showTabBar"
-        static let isDarkMode = "isDarkMode"
     }
     
     // MARK: - Style Types
@@ -63,23 +60,19 @@ class SwiftUITabBarRegister {
         // Parse show tab bar setting
         let showTabBar = parseBoolean(from: params, key: ConfigurationKeys.showTabBar, defaultValue: true)
         
-        // Parse dark mode setting
-        let isDarkMode = parseBoolean(from: params, key: ConfigurationKeys.isDarkMode, defaultValue: false)
-        
         return RegisterTabBarConfiguration(
             items: items,
             selectedItem: selectedItem,
             style: style,
             isAnimated: isAnimated,
-            showTabBar: showTabBar,
-            isDarkMode: isDarkMode
+            showTabBar: showTabBar
         )
     }
     
     private func parseItems(from parameters: [String: Any]) throws -> [TabBarItem] {
         guard let itemsData = parameters[ConfigurationKeys.items] as? [[String: Any]] else {
             // Return default items if none provided
-            return TabBarItemFactory.createDefaultItems()
+            return TabBarItemFactory.createDefaultItens()
         }
         
         var items: [TabBarItem] = []
@@ -152,12 +145,11 @@ class SwiftUITabBarRegister {
     
     private func createDefaultConfiguration() -> RegisterTabBarConfiguration {
         return RegisterTabBarConfiguration(
-            items: TabBarItemFactory.createDefaultItems(),
+            items: TabBarItemFactory.createDefaultItens(),
             selectedItem: nil,
             style: DefaultTabBarStyle(),
             isAnimated: true,
-            showTabBar: true,
-            isDarkMode: false
+            showTabBar: true
         )
     }
     
@@ -172,7 +164,6 @@ class SwiftUITabBarRegister {
             delegate: delegate,
             isAnimated: config.isAnimated
         )
-        .preferredColorScheme(config.isDarkMode ? .dark : .light)
         
         let hostingController = UIHostingController(rootView: tabBarView)
         hostingController.title = "TabBar"
@@ -191,17 +182,26 @@ private struct RegisterTabBarConfiguration {
     let style: any TabBarStyle
     let isAnimated: Bool
     let showTabBar: Bool
-    let isDarkMode: Bool
 }
 
 // MARK: - Register TabBar Delegate
-private class RegisterTabBarDelegate: TabBarDelegate, ObservableObject {
+private class RegisterTabBarDelegate: NSObject, TabBarDelegate {
     func tabBar(_ tabBar: any View, didSelectItem item: TabBarItem) {
         print("TabBar delegate: Selected item \(item.title ?? item.id)")
     }
     
     func tabBar(_ tabBar: any View, didPerformAction action: TabBarAction, for item: TabBarItem) {
         print("TabBar delegate: Performed action \(action) for item \(item.title ?? item.id)")
+    }
+    
+    func tabBar(_ tabBar: any View, controllerFor item: TabBarItem) -> UIViewController? {
+        // Return nil to use SwiftUI fallback
+        return nil
+    }
+    
+    func tabBar(_ tabBar: any View, createContentViewFor item: TabBarItem) -> AnyView? {
+        // Return nil to use default fallback
+        return nil
     }
 }
 

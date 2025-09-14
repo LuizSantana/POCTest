@@ -28,7 +28,7 @@ struct ItauSwiftUI {
             VStack(spacing: 0) {
                 TabView(selection: $selectedItem) {
                     ForEach(dataSource.itens()) { item in
-                        TabContentView(item: item)
+                        createContentView(for: item)
                             .tabItem {
                                 TabBarItemLabel(item: item)
                             }
@@ -60,8 +60,58 @@ struct ItauSwiftUI {
                 state: .visible
             )
         }
+        
+        // MARK: - Dynamic Content Creation
+        @ViewBuilder
+        private func createContentView(for item: TabBarItem) -> some View {
+            // First try to get a UIViewController from delegate
+            if let viewController = delegate?.tabBar(self, controllerFor: item) {
+                // Use UIKit view controller
+                UIViewControllerWrapper(viewController: viewController)
+            } else if let delegate = delegate, let customView = delegate.tabBar(self, createContentViewFor: item) {
+                // Try to get a custom View from delegate
+                customView
+            } else {
+                // Fallback to default SwiftUI view based on deeplink
+                createDefaultSwiftUIView(for: item)
+            }
+        }
+        
+        @ViewBuilder
+        private func createDefaultSwiftUIView(for item: TabBarItem) -> some View {
+            switch item.deeplink {
+            case "app://home":
+                HomeView(item: item)
+            case "app://search":
+                SearchView(item: item)
+            case "app://favorites":
+                FavoritesView(item: item)
+            case "app://profile":
+                ProfileView(item: item)
+            case "app://settings":
+                SettingsView(item: item)
+            default:
+                DefaultTabContentView(item: item)
+            }
+        }
+    }
+}
+
+// MARK: - UIViewController Wrapper
+struct UIViewControllerWrapper: UIViewControllerRepresentable {
+    let viewController: UIViewController
+    
+    func makeUIViewController(context: Context) -> UIViewController {
+        return viewController
     }
     
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
+        // No updates needed
+    }
+}
+
+// MARK: - ItauSwiftUI Namespace Extension
+extension ItauSwiftUI {
     // MARK: - TabBar Item Label
     struct TabBarItemLabel: View {
         let item: TabBarItem

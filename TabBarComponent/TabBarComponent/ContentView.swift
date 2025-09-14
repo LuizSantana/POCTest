@@ -9,13 +9,39 @@ class SampleTabBarDelegate: TabBarDelegate, ObservableObject {
     func tabBar(_ tabBar: any View, didPerformAction action: TabBarAction, for item: TabBarItem) {
         print("TabBar delegate: Performed action \(action) for item \(item.title ?? item.id)")
     }
+    
+    func tabBar(_ tabBar: any View, controllerFor item: TabBarItem) -> UIViewController? {
+        // Return UIKit view controllers for specific tabs
+        switch item.identifier {
+        case "home":
+            return HomeUIKitViewController(item: item)
+        case "search":
+            return UIHostingController(rootView: SearchView(item: item))
+        case "profile":
+            return ProfileUIKitViewController(item: item)
+        default:
+            return nil // Use SwiftUI fallback
+        }
+    }
+    
+    func tabBar(_ tabBar: any View, createContentViewFor item: TabBarItem) -> AnyView? {
+        // Create SwiftUI views for tabs that don't have UIKit controllers
+        switch item.deeplink {
+        case "app://favorites":
+            return AnyView(FavoritesView(item: item))
+        case "app://settings":
+            return AnyView(SettingsView(item: item))
+        default:
+            // Return nil to use default fallback for other tabs
+            return nil
+        }
+    }
 }
 
 struct ContentView: View {
     @State private var dataSource = MockTabBarDataSource(itens: TabBarItemFactory.createDefaultItens())
     @State private var selectedStyle: TabBarStyleType = .default
     @State private var showTabBar = true
-    @State private var isDarkMode = false
     @StateObject private var tabBarDelegate = SampleTabBarDelegate()
     
     var body: some View {
@@ -34,12 +60,10 @@ struct ContentView: View {
                     ControlPanel(
                         selectedStyle: $selectedStyle,
                         dataSource: dataSource,
-                        showTabBar: $showTabBar,
-                        isDarkMode: $isDarkMode
+                        showTabBar: $showTabBar
                     )
                 }
             }
-            .environment(\.colorScheme, isDarkMode ? .dark : .light)
             .navigationTitle("TabBar Component")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -85,7 +109,6 @@ struct ControlPanel: View {
     @Binding var selectedStyle: TabBarStyleType
     @ObservedObject var dataSource: MockTabBarDataSource
     @Binding var showTabBar: Bool
-    @Binding var isDarkMode: Bool
     
     var body: some View {
         VStack(spacing: 16) {
@@ -112,13 +135,6 @@ struct ControlPanel: View {
                 
                 // Environment controls
                 HStack(spacing: 16) {
-                    Button("Toggle Dark Mode") {
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            isDarkMode.toggle()
-                        }
-                    }
-                    .buttonStyle(.bordered)
-                    
                     Button("Toggle TabBar") {
                         withAnimation(.easeInOut(duration: 0.3)) {
                             dataSource.state = dataSource.currentState == TabBarState.visible ? TabBarState.hidden : TabBarState.visible

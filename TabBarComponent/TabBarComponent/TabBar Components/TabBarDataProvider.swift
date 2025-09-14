@@ -33,10 +33,8 @@ class MockTabBarDataSource: TabBarDataSource, ObservableObject {
     }
     
     func controller(for tabItem: TabBarItem) -> UIViewController? {
-        // Mock implementation
-        let viewController = UIHostingController(rootView: TabContentView(item: tabItem))
-        viewController.title = tabItem.title
-        return viewController
+        // Mock implementation - return nil to use SwiftUI fallback
+        return nil
     }
     
     // MARK: - Computed Properties for State Access
@@ -67,10 +65,8 @@ class DefaultTabBarDataSource: TabBarDataSource, ObservableObject {
     }
     
     func controller(for tabItem: TabBarItem) -> UIViewController? {
-        // Default implementation
-        let viewController = UIHostingController(rootView: TabContentView(item: tabItem))
-        viewController.title = tabItem.title
-        return viewController
+        // Default implementation - return nil to use SwiftUI fallback
+        return nil
     }
     
     // MARK: - Computed Properties for State Access

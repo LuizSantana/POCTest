@@ -5,7 +5,6 @@ struct ComponentStyleExample: View {
     @State private var dataSource = MockTabBarDataSource(itens: TabBarItemFactory.createDefaultItens())
     @State private var selectedStyle: TabBarStyleType = .default
     @State private var showTabBar = true
-    @State private var isDarkMode = false
     @StateObject private var tabBarDelegate = SampleTabBarDelegate()
     
     var body: some View {
@@ -18,7 +17,6 @@ struct ComponentStyleExample: View {
                     delegate: tabBarDelegate,
                     isAnimated: true
                 )
-                .environment(\.colorScheme, isDarkMode ? .dark : .light)
                 .onAppear {
                     dataSource.state = showTabBar ? .visible : .hidden
                 }
@@ -30,8 +28,7 @@ struct ComponentStyleExample: View {
                 ControlPanel(
                     selectedStyle: $selectedStyle,
                         dataSource: dataSource,
-                    showTabBar: $showTabBar,
-                    isDarkMode: $isDarkMode
+                    showTabBar: $showTabBar
                 )
             }
             .navigationTitle("ComponentStyle Pattern")
@@ -62,7 +59,6 @@ struct ComponentStyleExample: View {
 struct EnhancedControlPanel: View {
     @Binding var selectedStyle: TabBarStyleType
     @ObservedObject var dataSource: DefaultTabBarDataSource
-    @Binding var isDarkMode: Bool
     
     var body: some View {
         VStack(spacing: 16) {
@@ -89,13 +85,6 @@ struct EnhancedControlPanel: View {
                 
                 // Environment controls
                 HStack(spacing: 16) {
-                    Button("Toggle Dark Mode") {
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            isDarkMode.toggle()
-                        }
-                    }
-                    .buttonStyle(.bordered)
-                    
                     Button("Toggle TabBar") {
                         withAnimation(.easeInOut(duration: 0.3)) {
                             dataSource.state = dataSource.currentState == TabBarState.visible ? TabBarState.hidden : TabBarState.visible

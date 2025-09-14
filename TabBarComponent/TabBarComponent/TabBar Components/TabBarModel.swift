@@ -61,6 +61,8 @@ enum TabBarAction {
 protocol TabBarDelegate: AnyObject {
     func tabBar(_ tabBar: any View, didSelectItem item: TabBarItem)
     func tabBar(_ tabBar: any View, didPerformAction action: TabBarAction, for item: TabBarItem)
+    func tabBar(_ tabBar: any View, controllerFor item: TabBarItem) -> UIViewController?
+    func tabBar(_ tabBar: any View, createContentViewFor item: TabBarItem) -> AnyView?
 }
 
 // MARK: - TabBar Configuration
