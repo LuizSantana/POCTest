@@ -8,6 +8,7 @@ protocol TabBarDataSource: AnyObject {
     func itens() -> [TabBarItem]
     func action(for tabItem: TabBarItem) -> TabBarAction?
     func controller(for tabItem: TabBarItem) -> UIViewController?
+    func view(for tabItem: TabBarItem) -> AnyView?
 }
 
 
@@ -34,6 +35,11 @@ class MockTabBarDataSource: TabBarDataSource, ObservableObject {
     
     func controller(for tabItem: TabBarItem) -> UIViewController? {
         // Mock implementation - return nil to use SwiftUI fallback
+        return nil
+    }
+    
+    func view(for tabItem: TabBarItem) -> AnyView? {
+        // Mock implementation - return nil to use delegate fallback
         return nil
     }
     
@@ -66,6 +72,11 @@ class DefaultTabBarDataSource: TabBarDataSource, ObservableObject {
     
     func controller(for tabItem: TabBarItem) -> UIViewController? {
         // Default implementation - return nil to use SwiftUI fallback
+        return nil
+    }
+    
+    func view(for tabItem: TabBarItem) -> AnyView? {
+        // Default implementation - return nil to use delegate fallback
         return nil
     }
     

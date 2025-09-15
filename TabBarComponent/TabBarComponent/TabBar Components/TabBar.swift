@@ -4,7 +4,7 @@ import SwiftUI
 struct ItauSwiftUI {
     // MARK: - TabBar Component (TabView-based)
     struct TabBar: View {
-        private let dataSource: MockTabBarDataSource
+        private let dataSource: TabBarDataSource?
         private let style: any TabBarStyle
         private let delegate: TabBarDelegate?
         private let isAnimated: Bool
@@ -13,7 +13,7 @@ struct ItauSwiftUI {
         
         init(
             style: any TabBarStyle,
-            dataSource: MockTabBarDataSource,
+            dataSource: TabBarDataSource?,
             delegate: TabBarDelegate? = nil,
             isAnimated: Bool = true
         ) {
@@ -21,24 +21,29 @@ struct ItauSwiftUI {
             self.dataSource = dataSource
             self.delegate = delegate
             self.isAnimated = isAnimated
-            self._selectedItem = State(initialValue: dataSource.itens().first)
+            self._selectedItem = State(initialValue: dataSource?.itens().first)
         }
         
         var body: some View {
             VStack(spacing: 0) {
-                TabView(selection: $selectedItem) {
-                    ForEach(dataSource.itens()) { item in
-                        createContentView(for: item)
-                            .tabItem {
-                                TabBarItemLabel(item: item)
-                            }
-                            .tag(item)
+                if let dataSource = dataSource {
+                    TabView(selection: $selectedItem) {
+                        ForEach(dataSource.itens()) { item in
+                            createContentView(for: item)
+                                .tabItem {
+                                    TabBarItemLabel(item: item)
+                                }
+                                .tag(item)
+                        }
                     }
+                    .tabViewStyle(.page(indexDisplayMode: .never))
+                    
+                    // Custom TabBar styling overlay
+                    AnyView(style.makeBody(configuration: configuration))
+                } else {
+                    // Empty state when no data source
+                    EmptyView()
                 }
-                .tabViewStyle(.page(indexDisplayMode: .never))
-                
-                // Custom TabBar styling overlay
-                AnyView(style.makeBody(configuration: configuration))
             }
         .modifier(OnChangeModifier(
             value: selectedItem,
@@ -52,7 +57,7 @@ struct ItauSwiftUI {
         
         private var configuration: TabBarStyleConfiguration {
             TabBarStyleConfiguration(
-                items: dataSource.itens(),
+                items: dataSource?.itens() ?? [],
                 selectedItem: selectedItem,
                 onItemSelected: { item in
                     selectedItem = item
@@ -64,10 +69,16 @@ struct ItauSwiftUI {
         // MARK: - Dynamic Content Creation
         @ViewBuilder
         private func createContentView(for item: TabBarItem) -> some View {
-            // First try to get a UIViewController from delegate
-            if let viewController = delegate?.tabBar(self, controllerFor: item) {
-                // Use UIKit view controller
+            // First try to get a UIViewController from data source
+            if let viewController = dataSource?.controller(for: item) {
+                // Use UIKit view controller from data source
                 UIViewControllerWrapper(viewController: viewController)
+            } else if let viewController = delegate?.tabBar(self, controllerFor: item) {
+                // Use UIKit view controller from delegate
+                UIViewControllerWrapper(viewController: viewController)
+            } else if let customView = dataSource?.view(for: item) {
+                // Try to get a custom View from data source
+                customView
             } else if let delegate = delegate, let customView = delegate.tabBar(self, createContentViewFor: item) {
                 // Try to get a custom View from delegate
                 customView
@@ -142,22 +153,6 @@ extension ItauSwiftUI.TabBar {
         )
     }
     
-    func itens(_ itens: [TabBarItem]) -> ItauSwiftUI.TabBar {
-        dataSource._itens = itens
-        return self
-    }
-    
-    func selectedItem(_ item: TabBarItem?) -> ItauSwiftUI.TabBar {
-        if let item = item {
-            dataSource.selectedItem = item
-        }
-        return self
-    }
-    
-    func state(_ state: TabBarState) -> ItauSwiftUI.TabBar {
-        dataSource.state = state
-        return self
-    }
     
     func delegate(_ delegate: TabBarDelegate?) -> ItauSwiftUI.TabBar {
         ItauSwiftUI.TabBar(
@@ -177,37 +172,12 @@ extension ItauSwiftUI.TabBar {
         )
     }
     
-    func show() -> ItauSwiftUI.TabBar {
-        dataSource.state = TabBarState.visible
-        return self
-    }
-    
-    func hide() -> ItauSwiftUI.TabBar {
-        dataSource.state = TabBarState.hidden
-        return self
-    }
 }
 
-// MARK: - TabBar Convenience Initializers
-extension ItauSwiftUI.TabBar {
-    init(
-        itens: [TabBarItem] = [],
-        selectedItem: TabBarItem? = nil,
-        delegate: TabBarDelegate? = nil,
-        isAnimated: Bool = true
-    ) {
-        self.init(
-            style: DefaultTabBarStyle(),
-            dataSource: MockTabBarDataSource(itens: itens, selectedItem: selectedItem),
-            delegate: delegate,
-            isAnimated: isAnimated
-        )
-    }
-}
 
 // MARK: - TabBar View Modifier
 struct TabBarModifier: ViewModifier {
-    let dataSource: TabBarDataSource
+    let dataSource: TabBarDataSource?
     let delegate: TabBarDelegate?
     let isAnimated: Bool
     
@@ -217,7 +187,7 @@ struct TabBarModifier: ViewModifier {
             
             ItauSwiftUI.TabBar(
                 style: DefaultTabBarStyle(),
-                dataSource: dataSource as! MockTabBarDataSource,
+                dataSource: dataSource,
                 delegate: delegate,
                 isAnimated: isAnimated
             )
@@ -227,7 +197,7 @@ struct TabBarModifier: ViewModifier {
 
 extension View {
     func tabBar(
-        dataSource: TabBarDataSource,
+        dataSource: TabBarDataSource?,
         delegate: TabBarDelegate? = nil,
         isAnimated: Bool = true
     ) -> some View {
@@ -241,10 +211,10 @@ extension View {
 
 // MARK: - TabBar Data Source Binding
 extension ItauSwiftUI.TabBar {
-    func bind(to dataSource: TabBarDataSource) -> ItauSwiftUI.TabBar {
+    func bind(to dataSource: TabBarDataSource?) -> ItauSwiftUI.TabBar {
         ItauSwiftUI.TabBar(
             style: style,
-            dataSource: dataSource as! MockTabBarDataSource,
+            dataSource: dataSource,
             delegate: delegate,
             isAnimated: isAnimated
         )
