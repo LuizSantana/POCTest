@@ -52,23 +52,6 @@ struct iOS26SearchTabBarExample: View {
                 .padding(.horizontal)
             
             VStack(spacing: 12) {
-                // Search Style Picker
-                HStack {
-                    Text("Search Style:")
-                        .font(.subheadline)
-                    
-                    Spacer()
-                    
-                    Picker("Style", selection: $searchDelegate.searchStyle) {
-                        Text("Default").tag(SearchTabBarStyle.default)
-                        Text("Compact").tag(SearchTabBarStyle.compact)
-                        Text("Expanded").tag(SearchTabBarStyle.expanded)
-                        Text("Floating").tag(SearchTabBarStyle.floating)
-                    }
-                    .pickerStyle(SegmentedPickerStyle())
-                    .frame(maxWidth: 200)
-                }
-                .padding(.horizontal)
                 
                 // Search Enabled Toggle
                 HStack {
@@ -105,7 +88,6 @@ struct iOS26SearchTabBarExample: View {
 // MARK: - Example Search TabBar Delegate
 @available(iOS 26.0, *)
 class ExampleSearchTabBarDelegate: TabBarDelegate, SearchTabBarDelegate, ObservableObject {
-    @Published var searchStyle: SearchTabBarStyle = .default
     @Published var searchEnabled: Bool = true
     @Published var searchPlaceholder: String = "Search tabs..."
     
@@ -168,8 +150,7 @@ struct iOS26SearchTabBarUsageExamples {
         let dataSource = MockTabBarDataSource(itens: TabBarItemFactory.createDefaultItens())
         let searchConfig = iOS26SearchTabBarConfiguration(
             searchPlaceholder: "Find your tab...",
-            searchEnabled: true,
-            searchStyle: .floating
+            searchEnabled: true
         )
         
         return iOS26SearchTabBar(
@@ -185,7 +166,6 @@ struct iOS26SearchTabBarUsageExamples {
         let searchConfig = iOS26SearchTabBarConfiguration(
             searchPlaceholder: "Search with delegate...",
             searchEnabled: true,
-            searchStyle: .expanded,
             searchDelegate: delegate
         )
         

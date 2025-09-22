@@ -1,34 +1,23 @@
 import SwiftUI
 import UIKit
+import IDSDesignSystem
 
 // MARK: - iOS 26 Search TabBar Configuration
 @available(iOS 26.0, *)
 struct iOS26SearchTabBarConfiguration {
     let searchPlaceholder: String
     let searchEnabled: Bool
-    let searchStyle: SearchTabBarStyle
     let searchDelegate: SearchTabBarDelegate?
     
     init(
         searchPlaceholder: String = "Search...",
         searchEnabled: Bool = true,
-        searchStyle: SearchTabBarStyle = .default,
         searchDelegate: SearchTabBarDelegate? = nil
     ) {
         self.searchPlaceholder = searchPlaceholder
         self.searchEnabled = searchEnabled
-        self.searchStyle = searchStyle
         self.searchDelegate = searchDelegate
     }
-}
-
-// MARK: - Search TabBar Style
-@available(iOS 26.0, *)
-enum SearchTabBarStyle: String, CaseIterable {
-    case `default` = "default"
-    case compact = "compact"
-    case expanded = "expanded"
-    case floating = "floating"
 }
 
 // MARK: - Search TabBar Delegate
@@ -69,7 +58,6 @@ struct iOS26SearchTabBar: View {
             
             // Main TabBar
             ItauSwiftUI.TabBar(
-                style: DefaultTabBarStyle(),
                 dataSource: dataSource as! MockTabBarDataSource,
                 delegate: delegate
             )
@@ -182,7 +170,7 @@ struct iOS26SearchTabBar: View {
         guard !searchText.isEmpty else { return }
         
         isSearchActive = true
-        delegate?.tabBar(ItauSwiftUI.TabBar(style: DefaultTabBarStyle(), dataSource: dataSource as! MockTabBarDataSource), didSelectItem: TabBarItem(
+        delegate?.tabBar(ItauSwiftUI.TabBar(dataSource: dataSource as! MockTabBarDataSource), didSelectItem: TabBarItem(
             identifier: "search",
             title: "Search",
             icon: "magnifyingglass",
@@ -192,7 +180,7 @@ struct iOS26SearchTabBar: View {
         ))
         
         configuration.searchDelegate?.searchTabBar(
-            ItauSwiftUI.TabBar(style: DefaultTabBarStyle(), dataSource: dataSource as! MockTabBarDataSource),
+            ItauSwiftUI.TabBar(dataSource: dataSource as! MockTabBarDataSource),
             didSearch: searchText
         )
     }
@@ -203,7 +191,7 @@ struct iOS26SearchTabBar: View {
         searchSuggestions = []
         
         configuration.searchDelegate?.searchTabBar(
-            ItauSwiftUI.TabBar(style: DefaultTabBarStyle(), dataSource: dataSource as! MockTabBarDataSource),
+            ItauSwiftUI.TabBar(dataSource: dataSource as! MockTabBarDataSource),
             didClearSearch: true
         )
     }
@@ -223,7 +211,7 @@ struct iOS26SearchTabBar: View {
         performSearch()
         
         configuration.searchDelegate?.searchTabBar(
-            ItauSwiftUI.TabBar(style: DefaultTabBarStyle(), dataSource: dataSource as! MockTabBarDataSource),
+            ItauSwiftUI.TabBar(dataSource: dataSource as! MockTabBarDataSource),
             didSelectSearchSuggestion: suggestion
         )
     }
@@ -259,8 +247,7 @@ struct iOS26SearchTabBarFactory {
     static func createDefaultSearchConfiguration() -> iOS26SearchTabBarConfiguration {
         return iOS26SearchTabBarConfiguration(
             searchPlaceholder: "Search tabs...",
-            searchEnabled: true,
-            searchStyle: .default
+            searchEnabled: true
         )
     }
 }
@@ -297,14 +284,11 @@ extension SwiftUITabBarRegister {
         let items = try parseSearchItems(from: params)
         let searchPlaceholder = params["searchPlaceholder"] as? String ?? "Search tabs..."
         let searchEnabled = params["searchEnabled"] as? Bool ?? true
-        let searchStyleString = params["searchStyle"] as? String ?? "default"
-        let searchStyle = SearchTabBarStyle(rawValue: searchStyleString) ?? .default
         
         return SearchTabBarConfiguration(
             items: items,
             searchPlaceholder: searchPlaceholder,
-            searchEnabled: searchEnabled,
-            searchStyle: searchStyle
+            searchEnabled: searchEnabled
         )
     }
     
@@ -335,8 +319,7 @@ extension SwiftUITabBarRegister {
         return SearchTabBarConfiguration(
             items: TabBarItemFactory.createDefaultItens(),
             searchPlaceholder: "Search tabs...",
-            searchEnabled: true,
-            searchStyle: .default
+            searchEnabled: true
         )
     }
 }
@@ -367,5 +350,4 @@ private struct SearchTabBarConfiguration {
     let items: [TabBarItem]
     let searchPlaceholder: String
     let searchEnabled: Bool
-    let searchStyle: SearchTabBarStyle
 }

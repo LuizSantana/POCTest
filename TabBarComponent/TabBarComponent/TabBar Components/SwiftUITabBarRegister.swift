@@ -1,5 +1,6 @@
 import SwiftUI
 import UIKit
+import IDSDesignSystem
 
 // MARK: - SwiftUI TabBar Register
 class SwiftUITabBarRegister {
@@ -8,18 +9,9 @@ class SwiftUITabBarRegister {
     private enum ConfigurationKeys {
         static let items = "items"
         static let selectedItem = "selectedItem"
-        static let style = "style"
         static let delegate = "delegate"
         static let isAnimated = "isAnimated"
         static let showTabBar = "showTabBar"
-    }
-    
-    // MARK: - Style Types
-    private enum StyleType: String, CaseIterable {
-        case `default` = "default"
-        case compact = "compact"
-        case floating = "floating"
-        case minimal = "minimal"
     }
     
     // MARK: - Public Methods
@@ -51,9 +43,6 @@ class SwiftUITabBarRegister {
         // Parse selected item
         let selectedItem = try parseSelectedItem(from: params, items: items)
         
-        // Parse style
-        let style = try parseStyle(from: params)
-        
         // Parse animation setting
         let isAnimated = parseBoolean(from: params, key: ConfigurationKeys.isAnimated, defaultValue: true)
         
@@ -63,7 +52,6 @@ class SwiftUITabBarRegister {
         return RegisterTabBarConfiguration(
             items: items,
             selectedItem: selectedItem,
-            style: style,
             isAnimated: isAnimated,
             showTabBar: showTabBar
         )
@@ -120,24 +108,6 @@ class SwiftUITabBarRegister {
         }
     }
     
-    private func parseStyle(from parameters: [String: Any]) throws -> any TabBarStyle {
-        let styleString = parameters[ConfigurationKeys.style] as? String ?? "default"
-        
-        guard let styleType = StyleType(rawValue: styleString) else {
-            throw SwiftUITabBarError.invalidStyle(styleString)
-        }
-        
-        switch styleType {
-        case .default:
-            return DefaultTabBarStyle()
-        case .compact:
-            return CompactTabBarStyle()
-        case .floating:
-            return FloatingTabBarStyle()
-        case .minimal:
-            return MinimalTabBarStyle()
-        }
-    }
     
     private func parseBoolean(from parameters: [String: Any], key: String, defaultValue: Bool) -> Bool {
         return parameters[key] as? Bool ?? defaultValue
@@ -147,7 +117,6 @@ class SwiftUITabBarRegister {
         return RegisterTabBarConfiguration(
             items: TabBarItemFactory.createDefaultItens(),
             selectedItem: nil,
-            style: DefaultTabBarStyle(),
             isAnimated: true,
             showTabBar: true
         )
@@ -159,7 +128,6 @@ class SwiftUITabBarRegister {
         let delegate = RegisterTabBarDelegate()
         
         let tabBarView = ItauSwiftUI.TabBar(
-            style: config.style,
             dataSource: dataSource,
             delegate: delegate,
             isAnimated: config.isAnimated
@@ -179,7 +147,6 @@ class SwiftUITabBarRegister {
 private struct RegisterTabBarConfiguration {
     let items: [TabBarItem]
     let selectedItem: TabBarItem?
-    let style: any TabBarStyle
     let isAnimated: Bool
     let showTabBar: Bool
 }
@@ -208,15 +175,12 @@ private class RegisterTabBarDelegate: NSObject, TabBarDelegate {
 // MARK: - Error Types
 enum SwiftUITabBarError: Error, LocalizedError {
     case missingRequiredParameter(String)
-    case invalidStyle(String)
     case invalidParameter(String)
     
     var errorDescription: String? {
         switch self {
         case .missingRequiredParameter(let parameter):
             return "Missing required parameter: \(parameter)"
-        case .invalidStyle(let style):
-            return "Invalid style: \(style). Available styles: default, compact, floating, minimal"
         case .invalidParameter(let parameter):
             return "Invalid parameter: \(parameter)"
         }

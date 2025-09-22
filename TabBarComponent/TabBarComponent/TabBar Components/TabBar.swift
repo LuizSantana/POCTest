@@ -1,23 +1,22 @@
 import SwiftUI
+import IDSDesignSystem
 
 // MARK: - ItauSwiftUI Namespace
 struct ItauSwiftUI {
     // MARK: - TabBar Component (TabView-based)
     struct TabBar: View {
         private let dataSource: TabBarDataSource?
-        private let style: any TabBarStyle
         private let delegate: TabBarDelegate?
         private let isAnimated: Bool
         
         @State private var selectedItem: TabBarItem?
+        @Environment(\.self) private var themeColor
         
         init(
-            style: any TabBarStyle,
             dataSource: TabBarDataSource?,
             delegate: TabBarDelegate? = nil,
             isAnimated: Bool = true
         ) {
-            self.style = style
             self.dataSource = dataSource
             self.delegate = delegate
             self.isAnimated = isAnimated
@@ -25,46 +24,60 @@ struct ItauSwiftUI {
         }
         
         var body: some View {
-            VStack(spacing: 0) {
-                if let dataSource = dataSource {
+            if let dataSource = dataSource {
+                if #available(iOS 18.0, macOS 15.0, *) {
+                    TabView(selection: $selectedItem) {
+                        ForEach(dataSource.itens()) { item in
+                            Tab {
+                                createContentView(for: item)
+                            } label: {
+                                TabBarItemLabel(item: item)
+                            }
+                            .tag(item)
+                        }
+                    }
+                    .modifier(OnChangeModifier(
+                        value: selectedItem,
+                        action: { newValue in
+                            if let newValue = newValue {
+                                delegate?.tabBar(self, didSelectItem: newValue)
+                            }
+                        }
+                    ))
+                } else {
+                    // Fallback for iOS 17 and earlier
                     TabView(selection: $selectedItem) {
                         ForEach(dataSource.itens()) { item in
                             createContentView(for: item)
                                 .tabItem {
-                                    TabBarItemLabel(item: item)
+                                    VStack(spacing: 4) {
+                                        Image(idsIcon: IDSIconResource(name: LigaduraMapper.mapLigadura(item.icon)))
+                                            .font(.system(size: 20))
+                                        
+                                        if let title = item.title {
+                                            Text(title)
+                                                .font(.caption2)
+                                        }
+                                    }
                                 }
                                 .tag(item)
                         }
                     }
-                    .tabViewStyle(.page(indexDisplayMode: .never))
-                    
-                    // Custom TabBar styling overlay
-                    AnyView(style.makeBody(configuration: configuration))
-                } else {
-                    // Empty state when no data source
-                    EmptyView()
+                    .modifier(OnChangeModifier(
+                        value: selectedItem,
+                        action: { newValue in
+                            if let newValue = newValue {
+                                delegate?.tabBar(self, didSelectItem: newValue)
+                            }
+                        }
+                    ))
                 }
+            } else {
+                // Empty state when no data source
+                EmptyView()
             }
-        .modifier(OnChangeModifier(
-            value: selectedItem,
-            action: { newValue in
-                if let newValue = newValue {
-                    delegate?.tabBar(self, didSelectItem: newValue)
-                }
-            }
-        ))
         }
         
-        private var configuration: TabBarStyleConfiguration {
-            TabBarStyleConfiguration(
-                items: dataSource?.itens() ?? [],
-                selectedItem: selectedItem,
-                onItemSelected: { item in
-                    selectedItem = item
-                },
-                state: .visible
-            )
-        }
         
         // MARK: - Dynamic Content Creation
         @ViewBuilder
@@ -123,15 +136,16 @@ struct UIViewControllerWrapper: UIViewControllerRepresentable {
 
 // MARK: - ItauSwiftUI Namespace Extension
 extension ItauSwiftUI {
-    // MARK: - TabBar Item Label
+    // MARK: - TabBar Item Label (iOS 18+)
+    @available(iOS 18.0, macOS 15.0, *)
     struct TabBarItemLabel: View {
         let item: TabBarItem
+        @Environment(\.self) private var themeColor
         
         var body: some View {
-            VStack(spacing: 4) {
-                Image(systemName: item.icon)
+            Tab {
+                Image(idsIcon: IDSIconResource(name: LigaduraMapper.mapLigadura(item.icon)))
                     .font(.system(size: 20))
-                    .foregroundColor(.primary)
                 
                 if let title = item.title {
                     Text(title)
@@ -144,19 +158,8 @@ extension ItauSwiftUI {
 
 // MARK: - TabBar Modifiers
 extension ItauSwiftUI.TabBar {
-    func tabBarStyle(_ style: any TabBarStyle) -> ItauSwiftUI.TabBar {
-        ItauSwiftUI.TabBar(
-            style: style,
-            dataSource: dataSource,
-            delegate: delegate,
-            isAnimated: isAnimated
-        )
-    }
-    
-    
     func delegate(_ delegate: TabBarDelegate?) -> ItauSwiftUI.TabBar {
         ItauSwiftUI.TabBar(
-            style: style,
             dataSource: dataSource,
             delegate: delegate,
             isAnimated: isAnimated
@@ -165,13 +168,11 @@ extension ItauSwiftUI.TabBar {
     
     func animated(_ isAnimated: Bool) -> ItauSwiftUI.TabBar {
         ItauSwiftUI.TabBar(
-            style: style,
             dataSource: dataSource,
             delegate: delegate,
             isAnimated: isAnimated
         )
     }
-    
 }
 
 
@@ -186,7 +187,6 @@ struct TabBarModifier: ViewModifier {
             content
             
             ItauSwiftUI.TabBar(
-                style: DefaultTabBarStyle(),
                 dataSource: dataSource,
                 delegate: delegate,
                 isAnimated: isAnimated
@@ -213,7 +213,6 @@ extension View {
 extension ItauSwiftUI.TabBar {
     func bind(to dataSource: TabBarDataSource?) -> ItauSwiftUI.TabBar {
         ItauSwiftUI.TabBar(
-            style: style,
             dataSource: dataSource,
             delegate: delegate,
             isAnimated: isAnimated

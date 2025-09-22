@@ -1,4 +1,5 @@
 import SwiftUI
+import IDSDesignSystem
 
 // MARK: - Sample TabBar Delegate
 class SampleTabBarDelegate: TabBarDelegate, ObservableObject {
@@ -40,7 +41,6 @@ class SampleTabBarDelegate: TabBarDelegate, ObservableObject {
 
 struct ContentView: View {
     @State private var dataSource = MockTabBarDataSource(itens: TabBarItemFactory.createDefaultItens())
-    @State private var selectedStyle: TabBarStyleType = .default
     @State private var showTabBar = true
     @StateObject private var tabBarDelegate = SampleTabBarDelegate()
     
@@ -49,7 +49,6 @@ struct ContentView: View {
             VStack(spacing: 0) {
                 // Main content area
                 ItauSwiftUI.TabBar(
-                    style: currentStyle,
                     dataSource: dataSource,
                     delegate: tabBarDelegate,
                     isAnimated: true
@@ -58,7 +57,6 @@ struct ContentView: View {
                 // Control panel
                 if showTabBar {
                     ControlPanel(
-                        selectedStyle: $selectedStyle,
                         dataSource: dataSource,
                         showTabBar: $showTabBar
                     )
@@ -77,36 +75,9 @@ struct ContentView: View {
             }
         }
     }
-    
-    private var currentStyle: any TabBarStyle {
-        switch selectedStyle {
-        case .default:
-            return DefaultTabBarStyle()
-        case .compact:
-            return CompactTabBarStyle()
-        case .floating:
-            return FloatingTabBarStyle()
-        case .minimal:
-            return MinimalTabBarStyle()
-        case .composable:
-            return DefaultTabBarStyle()
-                .background(Color.blue.opacity(0.1), cornerRadius: 20)
-                .shadow(color: .blue.opacity(0.3), radius: 12, x: 0, y: 6)
-                .padding(horizontal: 20, vertical: 12)
-        }
-    }
-}
-
-enum TabBarStyleType: String, CaseIterable {
-    case `default` = "Default"
-    case compact = "Compact"
-    case floating = "Floating"
-    case minimal = "Minimal"
-    case composable = "Composable"
 }
 
 struct ControlPanel: View {
-    @Binding var selectedStyle: TabBarStyleType
     @ObservedObject var dataSource: MockTabBarDataSource
     @Binding var showTabBar: Bool
     
@@ -118,20 +89,6 @@ struct ControlPanel: View {
                 Text("TabBar Controls")
                     .font(.headline)
                     .foregroundColor(.primary)
-                
-                // Style selection
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Style")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                    
-                    Picker("Style", selection: $selectedStyle) {
-                        ForEach(TabBarStyleType.allCases, id: \.self) { style in
-                            Text(style.rawValue).tag(style)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                }
                 
                 // Environment controls
                 HStack(spacing: 16) {
@@ -164,15 +121,16 @@ struct ControlPanel: View {
 
 struct TabContentView: View {
     let item: TabBarItem
+    @Environment(\.self) private var themeColor
     
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
                 // Header
                 VStack(spacing: 16) {
-                    Image(systemName: item.icon)
+                    Image(idsIcon: IDSIconResource(name: LigaduraMapper.mapLigadura(item.icon)))
                         .font(.system(size: 80, weight: .light))
-                        .foregroundColor(.accentColor)
+                        .foregroundColor(themeColor.accent)
                     
                     Text(item.title ?? item.id.capitalized)
                         .font(.largeTitle)
@@ -181,7 +139,7 @@ struct TabContentView: View {
                     
                     Text("This is the content for \(item.title ?? item.id)")
                         .font(.body)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(themeColor.secondary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
                 }
@@ -190,7 +148,7 @@ struct TabContentView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Item Details")
                         .font(.headline)
-                        .foregroundColor(.primary)
+                        .foregroundColor(themeColor.primary)
                     
                     VStack(spacing: 8) {
                         DetailRow(label: "ID", value: item.id)
@@ -210,24 +168,24 @@ struct TabContentView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Sample Content")
                         .font(.headline)
-                        .foregroundColor(.primary)
+                        .foregroundColor(themeColor.primary)
                     
                     Text("This is sample content for the \(item.title ?? item.id) tab. You can add any SwiftUI views here to demonstrate your tab content.")
                         .font(.body)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(themeColor.secondary)
                     
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 12) {
                         ForEach(0..<6) { index in
                             RoundedRectangle(cornerRadius: 8)
-                                .fill(Color.accentColor.opacity(0.1))
+                                .fill(themeColor.accent.opacity(0.1))
                                 .frame(height: 80)
                                 .overlay(
                                     VStack {
-                                        Image(systemName: "star.fill")
-                                            .foregroundColor(.accentColor)
+                                        Image(idsIcon: IDSIconResource(name: LigaduraMapper.mapLigadura("star.fill")))
+                                            .foregroundColor(themeColor.accent)
                                         Text("Item \(index + 1)")
                                             .font(.caption)
-                                            .foregroundColor(.primary)
+                                            .foregroundColor(themeColor.primary)
                                     }
                                 )
                         }
@@ -247,15 +205,16 @@ struct TabContentView: View {
 struct DetailRow: View {
     let label: String
     let value: String
+    @Environment(\.self) private var themeColor
     
     var body: some View {
         HStack {
             Text(label + ":")
                 .fontWeight(.medium)
-                .foregroundColor(.primary)
+                .foregroundColor(themeColor.primary)
             Spacer()
             Text(value)
-                .foregroundColor(.secondary)
+                .foregroundColor(themeColor.secondary)
                 .textSelection(.enabled)
         }
         .padding(.vertical, 2)

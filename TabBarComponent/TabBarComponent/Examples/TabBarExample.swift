@@ -11,9 +11,6 @@ struct TabBarExample: View {
             VStack {
                 // Content area
                 ItauSwiftUI.TabBar(
-                    style: DefaultTabBarStyle()
-                        .background(Color(.systemBackground))
-                        .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: -4),
                     dataSource: dataSource,
                     delegate: tabBarDelegate,
                     isAnimated: true
@@ -34,18 +31,13 @@ struct TabBarExample: View {
                     }
                     
                     HStack(spacing: 16) {
-                        Button("Default Style") {
-                            // Switch to default style
+                        Button("Toggle Animation") {
+                            // Toggle animation
                         }
                         .buttonStyle(.bordered)
                         
-                        Button("Compact Style") {
-                            // Switch to compact style
-                        }
-                        .buttonStyle(.bordered)
-                        
-                        Button("Floating Style") {
-                            // Switch to floating style
+                        Button("Reset Selection") {
+                            // Reset selection
                         }
                         .buttonStyle(.bordered)
                     }
@@ -58,71 +50,13 @@ struct TabBarExample: View {
 }
 
 
-// MARK: - Multiple Style Examples
-struct TabBarStyleExamples: View {
-    @State private var dataSource = MockTabBarDataSource(itens: TabBarItemFactory.createDefaultItens())
-    @StateObject private var tabBarDelegate = SampleTabBarDelegate()
-    
-    var body: some View {
-        TabView {
-            // Default Style
-            ItauSwiftUI.TabBar(
-                style: DefaultTabBarStyle(),
-                dataSource: dataSource,
-                delegate: tabBarDelegate,
-                isAnimated: true
-            )
-            .tabItem {
-                Label("Default", systemImage: "rectangle.3.group")
-            }
-            
-            // Compact Style
-            ItauSwiftUI.TabBar(
-                style: CompactTabBarStyle(),
-                dataSource: dataSource,
-                delegate: tabBarDelegate,
-                isAnimated: true
-            )
-            .tabItem {
-                Label("Compact", systemImage: "rectangle.compress.vertical")
-            }
-            
-            // Floating Style
-            ItauSwiftUI.TabBar(
-                style: FloatingTabBarStyle(),
-                dataSource: dataSource,
-                delegate: tabBarDelegate,
-                isAnimated: true
-            )
-            .tabItem {
-                Label("Floating", systemImage: "circle.hexagongrid")
-            }
-            
-            // Minimal Style
-            ItauSwiftUI.TabBar(
-                style: MinimalTabBarStyle(),
-                dataSource: dataSource,
-                delegate: tabBarDelegate,
-                isAnimated: true
-            )
-            .tabItem {
-                Label("Minimal", systemImage: "minus.circle")
-            }
-        }
-    }
-}
-
-// MARK: - Composable Style Example
-struct ComposableStyleExample: View {
+// MARK: - Simple TabBar Example
+struct SimpleTabBarExample: View {
     @State private var dataSource = MockTabBarDataSource(itens: TabBarItemFactory.createDefaultItens())
     @StateObject private var tabBarDelegate = SampleTabBarDelegate()
     
     var body: some View {
         ItauSwiftUI.TabBar(
-            style: DefaultTabBarStyle()
-                .background(Color.blue.opacity(0.1), cornerRadius: 20)
-                .shadow(color: .blue.opacity(0.3), radius: 12, x: 0, y: 6)
-                .padding(horizontal: 20, vertical: 12),
             dataSource: dataSource,
             delegate: tabBarDelegate,
             isAnimated: true
@@ -137,11 +71,8 @@ struct TabBarExample_Previews: PreviewProvider {
             TabBarExample()
                 .previewDisplayName("Basic Example")
             
-            TabBarStyleExamples()
-                .previewDisplayName("Style Examples")
-            
-            ComposableStyleExample()
-                .previewDisplayName("Composable Style")
+            SimpleTabBarExample()
+                .previewDisplayName("Simple Example")
         }
     }
 }

@@ -1,15 +1,15 @@
 # TabBarComponent
 
-A comprehensive, composable SwiftUI TabBar component built with the MV (Model-View) pattern, featuring dynamic content creation, mixed UIKit/SwiftUI support, and iOS 26 search functionality.
+A modern, native SwiftUI TabBar component built with the MV (Model-View) pattern, featuring dynamic content creation, mixed UIKit/SwiftUI support, IDSDesignSystem integration, and iOS 26 search functionality.
 
 ## 🚀 Features
 
 ### Core Features
-- **Composable Architecture** - Built with the MV pattern for clean separation of concerns
+- **Native SwiftUI TabView** - Uses iOS 18+ Tab view with backward compatibility
+- **IDSDesignSystem Integration** - Consistent theming and icon management
 - **Dynamic Content Creation** - Automatically detects and handles both UIKit and SwiftUI content
 - **Mixed Technology Support** - Seamlessly integrates UIKit view controllers and SwiftUI views
-- **OS Color Scheme Integration** - Automatically adapts to system dark/light mode
-- **Multiple TabBar Styles** - Default, Compact, Floating, and Minimal styles
+- **Environment-Based Theming** - Uses `@Environment(\.self)` for dynamic color theming
 - **iOS 26 Search Support** - Advanced search functionality with suggestions
 - **Comprehensive Testing** - UI tests using XCAutomation framework
 
@@ -19,6 +19,7 @@ A comprehensive, composable SwiftUI TabBar component built with the MV (Model-Vi
 - **Delegate Pattern** - Flexible event handling and content creation
 - **Factory Pattern** - Easy component creation and configuration
 - **Environment Integration** - Respects system preferences and accessibility settings
+- **iOS 18+ Compatibility** - Modern Tab view implementation with fallback support
 
 ## 📁 Project Structure
 
@@ -26,10 +27,8 @@ A comprehensive, composable SwiftUI TabBar component built with the MV (Model-Vi
 TabBarComponent/
 ├── TabBarComponent/
 │   ├── TabBar Components/
-│   │   ├── TabBar.swift                    # Main TabBar component
+│   │   ├── TabBar.swift                    # Main TabBar component (Native TabView)
 │   │   ├── TabBarModel.swift               # Data models and protocols
-│   │   ├── TabBarStyle.swift               # Style system and modifiers
-│   │   ├── TabBarViews.swift               # TabBar view implementations
 │   │   ├── TabBarDataProvider.swift        # Data source protocols and implementations
 │   │   ├── TabContentViews.swift           # SwiftUI content views
 │   │   ├── UIKitTabControllers.swift       # UIKit view controllers
@@ -38,7 +37,7 @@ TabBarComponent/
 │   │   └── SwiftUITabBarRegister.swift     # UIKit integration
 │   ├── Examples/
 │   │   ├── TabBarExample.swift             # Basic usage examples
-│   │   ├── ComponentStyleExample.swift     # Style pattern examples
+│   │   ├── ComponentStyleExample.swift     # Simplified examples
 │   │   └── iOS26SearchTabBarExample.swift  # Search functionality examples
 │   ├── ContentView.swift                   # Main app content
 │   └── TabBarComponentApp.swift            # App entry point
@@ -50,8 +49,8 @@ TabBarComponent/
 ## 🏗️ Architecture
 
 ### MV Pattern Implementation
-- **Model**: `TabBarItem`, `TabBarState`, `TabBarAction`, `TabBarConfiguration`
-- **View**: `ItauSwiftUI.TabBar`, `TabBarStyle` implementations, content views
+- **Model**: `TabBarItem`, `TabBarState`, `TabBarAction`
+- **View**: `ItauSwiftUI.TabBar` (Native TabView), content views
 - **No ViewModel**: Direct data binding using `@ObservedObject` and `@State`
 
 ### Core Components
@@ -60,8 +59,7 @@ TabBarComponent/
 ```swift
 struct TabBar: View {
     init(
-        style: any TabBarStyle,
-        dataSource: MockTabBarDataSource,
+        dataSource: TabBarDataSource?,
         delegate: TabBarDelegate? = nil,
         isAnimated: Bool = true
     )
@@ -87,30 +85,48 @@ protocol TabBarDelegate: AnyObject {
 }
 ```
 
-## 🎨 TabBar Styles
+## 🎨 Native TabView Implementation
 
-### Available Styles
-1. **Default** - Standard iOS tab bar with separator
-2. **Compact** - Minimal design with rounded selection
-3. **Floating** - Floating design with material background
-4. **Minimal** - Ultra-minimal design with clear background
+### iOS 18+ Tab View
+The TabBar now uses the native SwiftUI TabView with iOS 18+ Tab support:
 
-### Style Usage
 ```swift
-// Basic usage
-ItauSwiftUI.TabBar(
-    style: DefaultTabBarStyle(),
-    dataSource: dataSource
-)
+// iOS 18+ Implementation
+@available(iOS 18.0, macOS 15.0, *)
+TabView(selection: $selectedItem) {
+    ForEach(dataSource.itens()) { item in
+        Tab {
+            createContentView(for: item)
+        } label: {
+            TabBarItemLabel(item: item)
+        }
+        .tag(item)
+    }
+}
+```
 
-// With modifiers
-ItauSwiftUI.TabBar(
-    style: DefaultTabBarStyle()
-        .background(.blue, cornerRadius: 12)
-        .shadow(radius: 8)
-        .padding(horizontal: 16, vertical: 8),
-    dataSource: dataSource
-)
+### Backward Compatibility
+For iOS 17 and earlier, it falls back to the traditional `.tabItem` approach:
+
+```swift
+// iOS 17 and earlier fallback
+TabView(selection: $selectedItem) {
+    ForEach(dataSource.itens()) { item in
+        createContentView(for: item)
+            .tabItem {
+                VStack(spacing: 4) {
+                    Image(idsIcon: IDSIconResource(name: LigaduraMapper.mapLigadura(item.icon)))
+                        .font(.system(size: 20))
+                    
+                    if let title = item.title {
+                        Text(title)
+                            .font(.caption2)
+                    }
+                }
+            }
+            .tag(item)
+    }
+}
 ```
 
 ## 🔍 Dynamic Content Creation
@@ -154,15 +170,14 @@ class DynamicTabBarDelegate: TabBarDelegate {
 ### Search Features
 - **Real-time Search** - Search as you type with suggestions
 - **Smart Suggestions** - Auto-generated from tab items
-- **Multiple Styles** - Default, Compact, Expanded, Floating
+- **Native Styling** - Uses system default styling for consistency
 - **Deep Linking** - Search queries integrated with navigation
 
 ### Search Usage
 ```swift
 let searchConfig = iOS26SearchTabBarConfiguration(
     searchPlaceholder: "Search tabs...",
-    searchEnabled: true,
-    searchStyle: .floating
+    searchEnabled: true
 )
 
 iOS26SearchTabBar(
@@ -170,16 +185,6 @@ iOS26SearchTabBar(
     dataSource: dataSource,
     delegate: delegate
 )
-```
-
-### Search Styles
-```swift
-enum SearchTabBarStyle: String, CaseIterable {
-    case `default` = "default"    // Standard iOS search bar
-    case compact = "compact"      // Minimal search interface
-    case expanded = "expanded"    // Enhanced search with borders
-    case floating = "floating"    // Floating search with shadow
-}
 ```
 
 ## 🎯 Data Models
@@ -229,7 +234,6 @@ struct ContentView: View {
     
     var body: some View {
         ItauSwiftUI.TabBar(
-            style: DefaultTabBarStyle(),
             dataSource: dataSource,
             delegate: SampleTabBarDelegate()
         )
@@ -237,15 +241,24 @@ struct ContentView: View {
 }
 ```
 
-### Custom Style with Modifiers
+### With IDSDesignSystem Integration
 ```swift
-ItauSwiftUI.TabBar(
-    style: FloatingTabBarStyle()
-        .background(.ultraThinMaterial, cornerRadius: 20)
-        .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
-        .padding(horizontal: 20, vertical: 12),
-    dataSource: dataSource
-)
+struct TabBarItemLabel: View {
+    let item: TabBarItem
+    @Environment(\.self) private var themeColor
+    
+    var body: some View {
+        VStack(spacing: 4) {
+            Image(idsIcon: IDSIconResource(name: LigaduraMapper.mapLigadura(item.icon)))
+                .font(.system(size: 20))
+            
+            if let title = item.title {
+                Text(title)
+                    .font(.caption2)
+            }
+        }
+    }
+}
 ```
 
 ### Dynamic Content with Mixed Technologies
@@ -295,30 +308,34 @@ func testTabBarVisibility() {
 
 ### Test Coverage
 - TabBar visibility/hiding
-- Style switching
 - Item selection
 - Dark mode adaptation
 - Search functionality (iOS 26)
+- IDSDesignSystem integration
 
 ## 🔧 Configuration
 
 ### Environment Variables
-- **Color Scheme** - Automatically follows system dark/light mode
+- **Color Scheme** - Uses `@Environment(\.self)` for dynamic theming
 - **Size Classes** - Adapts to compact/regular horizontal size classes
 - **Accessibility** - Respects accessibility preferences
+- **IDSDesignSystem** - Integrated theming and icon management
 
 ### Customization Options
-- **TabBar Styles** - 4 built-in styles with modifier support
+- **Native Styling** - Uses system default TabView styling
 - **Content Types** - UIKit, SwiftUI, or mixed content
 - **Search Configuration** - Customizable search behavior
 - **Animation** - Configurable animations and transitions
+- **Icon Management** - IDSDesignSystem with LigaduraMapper integration
 
 ## 📱 iOS Compatibility
 
 - **Minimum iOS Version**: 15.6
+- **iOS 18+ Features**: Native Tab view with `@available(iOS 18.0, macOS 15.0, *)`
 - **iOS 26 Features**: Search functionality with `@available(iOS 26.0, *)`
 - **Backward Compatibility**: Graceful degradation for older iOS versions
 - **SwiftUI Version**: 5.0+
+- **IDSDesignSystem**: Integrated for consistent theming and icons
 
 ## 🚀 Getting Started
 
@@ -348,7 +365,6 @@ let dataSource = MockTabBarDataSource(
 ### 4. Add TabBar
 ```swift
 ItauSwiftUI.TabBar(
-    style: DefaultTabBarStyle(),
     dataSource: dataSource
 )
 ```
@@ -356,15 +372,18 @@ ItauSwiftUI.TabBar(
 ## 🔄 Migration Guide
 
 ### From Previous Versions
-1. **Remove darkMode/lightMode** - Now uses OS color scheme
+1. **Remove style parameters** - Now uses native TabView styling
 2. **Update delegate methods** - New signature with `any View`
 3. **Use new naming** - `itens` instead of `items`, `TabBarDataSource` instead of `TabBarDataProvider`
+4. **Add IDSDesignSystem** - Import and use for icons and theming
 
 ### Breaking Changes
 - `TabBarDataProvider` → `TabBarDataSource`
 - `items()` → `itens()`
-- Removed manual dark mode management
-- Updated delegate method signatures
+- Removed all style-related parameters and enums
+- Removed `TabBarStyle` protocol and implementations
+- Updated to use `@Environment(\.self)` for theming
+- Added IDSDesignSystem integration for icons
 
 ## 🤝 Contributing
 
@@ -384,6 +403,8 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Follows Apple Human Interface Guidelines
 - Implements modern iOS design patterns
 - Supports accessibility best practices
+- Integrated with IDSDesignSystem for consistent theming
+- Uses native iOS 18+ Tab view for optimal performance
 
 ## 📞 Support
 
@@ -394,4 +415,5 @@ For questions, issues, or contributions, please:
 
 ---
 
-**TabBarComponent** - A modern, composable SwiftUI TabBar solution for iOS applications.
+**TabBarComponent** - A modern, native SwiftUI TabBar solution with IDSDesignSystem integration for iOS applications.
+
